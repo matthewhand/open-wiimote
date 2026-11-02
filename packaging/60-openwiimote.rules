@@ -1,0 +1,22 @@
+# Grants the desktop user access to the hidraw node of a Nintendo Wii Remote, so
+# OpenWiimote can open it without running as root.
+#
+# Install with:
+#   sudo install -m 0644 packaging/60-openwiimote.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger --subsystem-match=hidraw
+#
+# A remote paired over Bluetooth inherits the adapter's USB ids, so the rule matches the
+# kernel hid-wiimote driver and the HID id instead of the USB vendor and product.
+
+# Bluetooth and USB remotes handled by the in-kernel driver.
+SUBSYSTEM=="hidraw", DRIVERS=="wiimote", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# Remotes without the kernel driver bound, matched by their HID id.
+SUBSYSTEM=="hidraw", KERNELS=="0005:057E:*", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+SUBSYSTEM=="hidraw", KERNELS=="0003:057E:*", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# Player LEDs published by the kernel driver, so the app can switch them.
+SUBSYSTEM=="leds", KERNEL=="0005:057E:*:blue:p?", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# Virtual gamepad. plugdev can read the remote; this node is what publishes the controller.
+KERNEL=="uinput", SUBSYSTEM=="misc", MODE="0660", GROUP="input", TAG+="uaccess"

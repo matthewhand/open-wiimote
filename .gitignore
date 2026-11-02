@@ -1,0 +1,29 @@
+.dotnet/
+**/bin/
+**/obj/
+secrets/
+*.secrets
+appsettings.*.json
+!appsettings.json
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+decompiled/
+node_modules/
+test-results/
+playwright-report/
+OpenWiimote/
+
+# Python notice tooling and tests
+__pycache__/
+*.pyc
+
+# Also ignore a local dependency-cache symlink.
+node_modules

@@ -1,0 +1,33 @@
+# Example capture for
+#   dotnet run --project src/OpenWiimote.App -- --replay tools/sample-reports.txt
+#
+# One report per line, hex bytes separated by spaces. Lines starting with # and blank
+# lines are ignored. Byte values come from the report layouts documented in
+# WiimoteReportParser (offsets follow the Linux hid-wiimote driver).
+#
+# 0x80 is the zero point of an accelerometer axis and 0x9A is one gravity of it, so
+# 80 80 9A is a remote lying flat with Z carrying the gravity.
+
+# Status report: LED 1 lit, button One held, 100% battery, no extension
+20 00 02 18 00 00 D7
+
+# Core buttons only, nothing pressed
+30 00 00
+
+# Core buttons and accelerometer: A and B held, remote lying flat
+31 00 0C 80 80 9A
+
+# Core buttons and accelerometer: rolled to the right by about 33 degrees
+31 00 00 8E 80 96
+
+# A truncated report: the id is decoded and nothing else
+31 00
+
+# Reply to the read of the extension identifier at 0xA400FA: a Nunchuk
+21 00 00 50 00 FA 00 00 A4 20 00 00 00 00 00 00 00 00 00 00 00 00
+
+# Buttons, accelerometer and extension: a Nunchuk with its stick centred, nothing held
+35 00 00 80 80 9A 80 80 80 80 80 03 00 00 00 00 00 00 00 00 00 00
+
+# Accepting a write of the extension encryption register
+22 00 00 16 00

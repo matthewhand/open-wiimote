@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>OpenWiimote.Platform.Linux</RootNamespace>
+    <AssemblyName>OpenWiimote.Platform.Linux</AssemblyName>
+    <Description>Linux uinput virtual gamepad backend for OpenWiimote.</Description>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenWiimote.Core\OpenWiimote.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The tests check the event stream the virtual pad writes, which is internal. -->
+    <InternalsVisibleTo Include="OpenWiimote.Core.Tests" />
+  </ItemGroup>
+
+</Project>

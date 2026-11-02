@@ -1,0 +1,33 @@
+{
+  "version": "0.1.0-rc.2",
+  "sourceExport": "Reviewed snapshot; private Git history, PRs and local configuration are not included.",
+  "removed": [
+    ".env",
+    ".github/workflows/ci.yml"
+  ],
+  "sanitizedFiles": [
+    "README.md",
+    "docs/Integration-Test-Approach.md",
+    "docs/Linux-Release.md",
+    "docs/Quality-Plan.md",
+    "docs/Release-Notes.md",
+    "package-lock.json",
+    "package.json",
+    "scripts/package-linux.sh",
+    "tests/OpenWiimote.App/DashboardExtrasTests.spec.ts",
+    "tests/OpenWiimote.App/DeviceSearchTests.spec.ts",
+    "tests/OpenWiimote.App/WebUiSmokeTests.spec.ts",
+    "tests/OpenWiimote.Core.Tests/DeviceViewModelTests.cs",
+    "tests/OpenWiimote.Core.Tests/FakeWiimoteDevice.cs",
+    "tests/OpenWiimote.Core.Tests/FakeWiimoteWatcherTests.cs",
+    "tests/OpenWiimote.Core.Tests/HidDeviceIdentityTests.cs",
+    "tests/OpenWiimote.Core.Tests/HidSysfsTests.cs",
+    "tools/lan-wiimote-view.py"
+  ],
+  "githubActions": "disabled",
+  "hardwareAcceptance": "partial; see docs/Release-Notes.md",
+  "runtimeSource": "All 64 src/ files match the reviewed original source; export changes affect documentation, test identifiers, package metadata and a diagnostic tool default.",
+  "reviewedOriginalSourceCommit": "dd74118c8adf55abf543a596fbc25d3bfbff1136",
+  "reviewedOriginalSourceTree": "ba24fa3d1466a9ab1c851c1e733fe008d7406310",
+  "binarySource": "Public source snapshot commit and tree recorded in the packaged release.json."
+}

@@ -1,0 +1,27 @@
+{
+  "name": "openwiimote",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matthewhand/openwiimote.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matthewhand/openwiimote/issues"
+  },
+  "homepage": "https://github.com/matthewhand/openwiimote#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}

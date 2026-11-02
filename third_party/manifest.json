@@ -1,0 +1,584 @@
+{
+  "schemaVersion": 1,
+  "packages": {
+    "Avalonia/11.3.22": {
+      "sha512": "sha512-61kKbPq/2W/S8PkjRYnDCSvH2fAvhC3eTrYFtwMUZVShP5M2xXII76kIQo8bcezxwFkHc/yoRP3xzae2tFZRsQ==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/Avalonia/",
+        "commit": "627ae9ef921621e27e7aa58df2796fbadb50af88"
+      },
+      "documents": [
+        "Avalonia-LICENSE.txt",
+        "Avalonia-NOTICE.md"
+      ],
+      "files": {
+        "Avalonia.Base.dll": "499fa3bc5fc67c68a3fe7878a41d1a999e1e1d0a803c4720e6bde7af9d4b503c",
+        "Avalonia.Controls.dll": "7443c62f26877dbdb4d6344a80da0073581de81ff41f312cd89e303f8ad0d818",
+        "Avalonia.DesignerSupport.dll": "085ff03fc21d5aac324334d7cc072aa8a366a6b7f43dd6e61142c4385122c088",
+        "Avalonia.Dialogs.dll": "0e5cdb7bfc305617cbafc0fc3f85aef22befebdcf715fb3ce789f9bd797523cf",
+        "Avalonia.Markup.Xaml.dll": "83e52184a26289ccad19ef658931d38e56a24c8493253bf6c85f8097aa26d71f",
+        "Avalonia.Markup.dll": "e7ec0a01631ec70b48a11f049d9ee6d7ed5d41fdadc09671d9be3d96c39896c4",
+        "Avalonia.Metal.dll": "3252c96aaf54a8d26b4cc1f0d5adb05a30dc4172426601c0bcde6981f7ac9618",
+        "Avalonia.MicroCom.dll": "1b42462c80577d3ef40af2b6dd864147eb014877f9d62756c32df11335550835",
+        "Avalonia.OpenGL.dll": "f962ab7f1a5f967e526e81b4e7194789957ca9aad5d7af92d08484fe2969027e",
+        "Avalonia.Vulkan.dll": "3af1944812eeb4ae41407e0b4e3aad655ba3b20cc4f3d6b17438bfba1e20a391",
+        "Avalonia.dll": "3098925ae76f9cd96238dd80323a537928ca4c36b997e9cb91983389f53d6250"
+      }
+    },
+    "Avalonia.Angle.Windows.Natives/2.1.25547.20250602": {
+      "sha512": "sha512-ZL0VLc4s9rvNNFt19Pxm5UNAkmKNylugAwJPX9ulXZ6JWs/l6XZihPWWTyezaoNOVyEPU8YbURtW7XMAtqXH5A==",
+      "declaredLicense": "LICENSE",
+      "licenseType": "file",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/angle/",
+        "commit": "cb8b4e1307a9d8f5ff56b8c5973bea4158ffead8"
+      },
+      "documents": [
+        "ANGLE-LICENSE.txt",
+        "SkiaSharp-HarfBuzzSharp-THIRD-PARTY-NOTICES.txt"
+      ],
+      "files": {
+        "runtimes/win-arm64/native/av_libglesv2.dll": "e1e7a9e9b4429739624fac5deb5fa11124b91b24819f941b0ab3652b305286ff",
+        "runtimes/win-x64/native/av_libglesv2.dll": "9b203e40323b49dad29546a52b8b67d200bba8ff4cab9709a79cede23ba847d4",
+        "runtimes/win-x86/native/av_libglesv2.dll": "0707d1f54e86cda8cb69b00460bf18aabb6e9319b12ec42502dad977b63a33c0"
+      }
+    },
+    "Avalonia.Desktop/11.3.22": {
+      "sha512": "sha512-TXdIJ5WA473KqFd/b3EqnXUIgFDhPuOx2OkzG7Fm8EkCPF5JKkCwg+i7yq8IRsYKcQ4I8X/4HkUyCb8DcfgfYg==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/Avalonia/",
+        "commit": "627ae9ef921621e27e7aa58df2796fbadb50af88"
+      },
+      "documents": [
+        "Avalonia-LICENSE.txt",
+        "Avalonia-NOTICE.md"
+      ],
+      "files": {
+        "Avalonia.Desktop.dll": "9436cfee6fcb4ed55576235b18fac1bef66b312ff8f2bea410ef67b39c60f7b0"
+      }
+    },
+    "Avalonia.Fonts.Inter/11.3.22": {
+      "sha512": "sha512-oGIn2U71EWTcTQ+zQU0CuJ5b+QsXIvmN7kvn5VSszgU6baZ0/1hDsR3wwXsU7hDFnJD1G541wtPqaGlZtKnPhA==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/Avalonia/",
+        "commit": "627ae9ef921621e27e7aa58df2796fbadb50af88"
+      },
+      "documents": [
+        "Avalonia-LICENSE.txt",
+        "Avalonia-NOTICE.md",
+        "Inter-OFL-1.1.txt"
+      ],
+      "files": {
+        "Avalonia.Fonts.Inter.dll": "f6384bc5e70996ad6bedfbd2452075e6c3fdfe2d48b3d490e7e7c7ec5c8309a7"
+      }
+    },
+    "Avalonia.FreeDesktop/11.3.22": {
+      "sha512": "sha512-heXRjopzKbNVGnLI+YPM6VBcf+cKGKKNdyXBYAlAlbcPfkExOTrGBSPDSSSHaT9uEByqZ4xo/9T0IqDtGm2PAQ==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/Avalonia/",
+        "commit": "627ae9ef921621e27e7aa58df2796fbadb50af88"
+      },
+      "documents": [
+        "Avalonia-LICENSE.txt",
+        "Avalonia-NOTICE.md"
+      ],
+      "files": {
+        "Avalonia.FreeDesktop.dll": "2df5e3dbee6e92e971559367e26874763151f0ecd328230f4245374c959f54a0"
+      }
+    },
+    "Avalonia.Native/11.3.22": {
+      "sha512": "sha512-sU/KJQKqrRkstS1EWIhRvD/ADIkItoOSss3sL/wtPFFFJINPOrge5qMnwNi0RbDzNKb4TrZwEv6eeD27Ip+ACQ==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/Avalonia/",
+        "commit": "627ae9ef921621e27e7aa58df2796fbadb50af88"
+      },
+      "documents": [
+        "Avalonia-LICENSE.txt",
+        "Avalonia-NOTICE.md"
+      ],
+      "files": {
+        "Avalonia.Native.dll": "adcc965298df1b901793a20dd97cecd222bda3ebb8304e67f1ce16058e6b7de8",
+        "runtimes/osx/native/libAvaloniaNative.dylib": "51a74868e785071b5c730022e09626cf25caf40de1cf36f153f0560527bb9410"
+      }
+    },
+    "Avalonia.Remote.Protocol/11.3.22": {
+      "sha512": "sha512-Ll5YswLkNW0WZm7RkvGS+8B9vH4/x77IsnCqlBvmXOgiQd0J5bpJQFYo1NDVyRLadp4e8Yqg1WP2xEc6IK94HQ==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/Avalonia/",
+        "commit": "627ae9ef921621e27e7aa58df2796fbadb50af88"
+      },
+      "documents": [
+        "Avalonia-LICENSE.txt",
+        "Avalonia-NOTICE.md"
+      ],
+      "files": {
+        "Avalonia.Remote.Protocol.dll": "bfeae2db167106578d989b05a7c3081e433b0b22757015689e70ee6da01afd08"
+      }
+    },
+    "Avalonia.Skia/11.3.22": {
+      "sha512": "sha512-ZbnfFCr2f1l3RD1E/Tn5tJDRFIDm9ICY/PzG4lhuShd6mDg+0y5wRCytCYOSM79KhlboU/f0O7J1Mw7s83Sy3A==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/Avalonia/",
+        "commit": "627ae9ef921621e27e7aa58df2796fbadb50af88"
+      },
+      "documents": [
+        "Avalonia-LICENSE.txt",
+        "Avalonia-NOTICE.md"
+      ],
+      "files": {
+        "Avalonia.Skia.dll": "fd7a05ee6d5c46571b455c9cdb7a38325f58a5a7a49c9cb1283d4fbcc63ad31e"
+      }
+    },
+    "Avalonia.Themes.Fluent/11.3.22": {
+      "sha512": "sha512-tCui436MQuxeIXj/eA/Mq9neAgNTud0Jk22HDWSo05KT+vaH5oJa53xI8PxEi3uRSsWK2l9yoQciLKrzzIrqCw==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/Avalonia/",
+        "commit": "627ae9ef921621e27e7aa58df2796fbadb50af88"
+      },
+      "documents": [
+        "Avalonia-LICENSE.txt",
+        "Avalonia-NOTICE.md"
+      ],
+      "files": {
+        "Avalonia.Themes.Fluent.dll": "a95534bd36bcc531f11ab5a6b67506681d2627049d742f3fd80aea3553d4b9ad"
+      }
+    },
+    "Avalonia.Win32/11.3.22": {
+      "sha512": "sha512-9kP1kWFJtbW2fFmGY2fs1kn0Rx1ARpf3Mz+QrLhagYUp6RaMN5Imus5YiOQWCTe8ZkQqktt8PsKUDWyvj8SiYQ==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/Avalonia/",
+        "commit": "627ae9ef921621e27e7aa58df2796fbadb50af88"
+      },
+      "documents": [
+        "Avalonia-LICENSE.txt",
+        "Avalonia-NOTICE.md"
+      ],
+      "files": {
+        "Avalonia.Win32.Automation.dll": "0b339e393afd48855feafade4aca93521b2d5f48db82193e532e3627abd122d2",
+        "Avalonia.Win32.dll": "60849b34f83b36679f77b431af056306f20ba4d82aecfe2a2fae50a4798b9487"
+      }
+    },
+    "Avalonia.X11/11.3.22": {
+      "sha512": "sha512-w4OZxdAPAjGDKpBrU5kbiXzbbQT/ZcdGTMareDODdyIPFvd4AX+5iPAv08Ih87evHOXAf04dpvJyAEPgw1kMFg==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/AvaloniaUI/Avalonia/",
+        "commit": "627ae9ef921621e27e7aa58df2796fbadb50af88"
+      },
+      "documents": [
+        "Avalonia-LICENSE.txt",
+        "Avalonia-NOTICE.md"
+      ],
+      "files": {
+        "Avalonia.X11.dll": "3f36729c3af81ee34b165b64a9ec43ad10f305881d67aa596757ce98f002d12e"
+      }
+    },
+    "HarfBuzzSharp/8.3.1.1": {
+      "sha512": "sha512-tLZN66oe/uiRPTZfrCU4i8ScVGwqHNh5MHrXj0yVf4l7Mz0FhTGnQ71RGySROTmdognAs0JtluHkL41pIabWuQ==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://go.microsoft.com/fwlink/?linkid=868515",
+        "branch": "release/3.119.0",
+        "commit": "64f24b1cddb68d30ec0ac6b661964178fc21d5ec"
+      },
+      "documents": [
+        "SkiaSharp-HarfBuzzSharp-LICENSE.txt",
+        "SkiaSharp-HarfBuzzSharp-THIRD-PARTY-NOTICES.txt"
+      ],
+      "files": {
+        "HarfBuzzSharp.dll": "951fdc1c6db0bad84ae9329297dec0fcd38e1105ee477479ec66b8900e2f3bb5"
+      }
+    },
+    "HarfBuzzSharp.NativeAssets.Linux/8.3.1.1": {
+      "sha512": "sha512-3EZ1mpIiKWRLL5hUYA82ZHteeDIVaEA/Z0rA/wU6tjx6crcAkJnBPwDXZugBSfo8+J3EznvRJf49uMsqYfKrHg==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://go.microsoft.com/fwlink/?linkid=868515",
+        "branch": "release/3.119.0",
+        "commit": "64f24b1cddb68d30ec0ac6b661964178fc21d5ec"
+      },
+      "documents": [
+        "SkiaSharp-HarfBuzzSharp-LICENSE.txt",
+        "SkiaSharp-HarfBuzzSharp-THIRD-PARTY-NOTICES.txt"
+      ],
+      "files": {
+        "runtimes/linux-arm/native/libHarfBuzzSharp.so": "d19fc0b68ed5fda6f89879d75a432ca5339398b124423b25ecce3e14a2480c30",
+        "runtimes/linux-arm64/native/libHarfBuzzSharp.so": "d9f2d50d113d438b2623b4a2a6dcc6a5cd8445947630734f3a5fe5843718625b",
+        "runtimes/linux-loongarch64/native/libHarfBuzzSharp.so": "ce687b3775458840067f6735d7ef0d93b34d90f4d71bda17d4aa465cc50b496c",
+        "runtimes/linux-musl-arm/native/libHarfBuzzSharp.so": "7bb1fab60a6e1394a5c4bde396a02496c211f7ae7978a7f6d0660890a6e5fc8b",
+        "runtimes/linux-musl-arm64/native/libHarfBuzzSharp.so": "096e2c806b979312a7016d44d0d08e252fed622786448433295dc1801063968e",
+        "runtimes/linux-musl-loongarch64/native/libHarfBuzzSharp.so": "9c78895b054eee211fbdb4d4785c5cf8e814f930bd33970f7e45f6187bb3fb0f",
+        "runtimes/linux-musl-riscv64/native/libHarfBuzzSharp.so": "700a2e2b0852969cac16d290d60109f84520d1d44f65f1d0f0218a920e4fd4ce",
+        "runtimes/linux-musl-x64/native/libHarfBuzzSharp.so": "5db6617b0c99b1377dcd1da4bbe5ec984312b852548cbd59be3d4bca8f057f66",
+        "runtimes/linux-riscv64/native/libHarfBuzzSharp.so": "cd8b0e26363262c6683975196c6bb3337e55ac22961150753b74e609f5247a2d",
+        "runtimes/linux-x64/native/libHarfBuzzSharp.so": "c952458933ea7f1ce66ade61fa32e708df7dfb2ab8bae77ed5ec06f49223a75c",
+        "runtimes/linux-x86/native/libHarfBuzzSharp.so": "d0aff4692b65ffe2a03c400e81a2bea96c2bd7257b58fabf50765731db6d5373"
+      }
+    },
+    "HarfBuzzSharp.NativeAssets.macOS/8.3.1.1": {
+      "sha512": "sha512-jbtCsgftcaFLCA13tVKo5iWdElJScrulLTKJre36O4YQTIlwDtPPqhRZNk+Y0vv4D1gxbscasGRucUDfS44ofQ==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://go.microsoft.com/fwlink/?linkid=868515",
+        "branch": "release/3.119.0",
+        "commit": "64f24b1cddb68d30ec0ac6b661964178fc21d5ec"
+      },
+      "documents": [
+        "SkiaSharp-HarfBuzzSharp-LICENSE.txt",
+        "SkiaSharp-HarfBuzzSharp-THIRD-PARTY-NOTICES.txt"
+      ],
+      "files": {
+        "runtimes/osx/native/libHarfBuzzSharp.dylib": "bdfb4e1001ae1b24cff6e1ebe740e0bbf88e5bd2678aa8409cadfac960f09037"
+      }
+    },
+    "HarfBuzzSharp.NativeAssets.Win32/8.3.1.1": {
+      "sha512": "sha512-UsJtQsfAJoFDZrXc4hCUfRPMqccfKZ0iumJ/upcUjz/cmsTgVFGNEL5yaJWmkqsuFYdMWbj/En5/kS4PFl9hBA==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://go.microsoft.com/fwlink/?linkid=868515",
+        "branch": "release/3.119.0",
+        "commit": "64f24b1cddb68d30ec0ac6b661964178fc21d5ec"
+      },
+      "documents": [
+        "SkiaSharp-HarfBuzzSharp-LICENSE.txt",
+        "SkiaSharp-HarfBuzzSharp-THIRD-PARTY-NOTICES.txt"
+      ],
+      "files": {
+        "runtimes/win-arm64/native/libHarfBuzzSharp.dll": "08bb823d84f12f1c54166c643ab6881601b8f0d6037c05a92345c53a52f7a7a5",
+        "runtimes/win-x64/native/libHarfBuzzSharp.dll": "eb76238c9e8e41d44b5a5b18167c4c5b39ca5db4277af5dbe92d730f0fc14a7d",
+        "runtimes/win-x86/native/libHarfBuzzSharp.dll": "f2010ec6bffadf2238e7718bc48a3f5a8cdfa446806fe749ad5bf4f526e8ea95"
+      }
+    },
+    "HidSharp/2.6.2": {
+      "sha512": "sha512-Z0lsAgIQEx/R43VlE8/tc4l3I3osK3o37RKP4iIGkb8i/88jmKxwXy0bQu4WHTL8L7Vm2zgGvsTOH3GMQb8Rsw==",
+      "declaredLicense": "LICENSE.txt",
+      "licenseType": "file",
+      "repository": null,
+      "documents": [
+        "HidSharp-LICENSE.txt"
+      ],
+      "files": {
+        "HidSharp.dll": "e38f39c472a47364ffc0c5d16b73fc6469a5870056d69f24f510f8e8cc90fe5d"
+      }
+    },
+    "MicroCom.Runtime/0.11.0": {
+      "sha512": "sha512-MEnrZ3UIiH40hjzMDsxrTyi8dtqB5ziv3iBeeU4bXsL/7NLSal9F1lZKpK+tfBRnUoDSdtcW3KufE4yhATOMCA==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/kekekeks/MicroCom"
+      },
+      "documents": [
+        "MicroCom-LICENSE.txt"
+      ],
+      "files": {
+        "MicroCom.Runtime.dll": "59839e18e46b06ab23b633944ae3c3b552a300c5da389da870dfa980bcef93c1"
+      }
+    },
+    "Nefarius.ViGEm.Client/1.21.256": {
+      "sha512": "sha512-VJMO6hkalOZ7YdXTwcR881aTgPZlN7thEs3x6CWE/kEu7SdE5bY7QuDXkR2eqXfPAee4NrxInIAqa45PorpTsA==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "url": "https://github.com/ViGEm/ViGEm.NET"
+      },
+      "documents": [
+        "ViGEm.NET-LICENSE.txt"
+      ],
+      "files": {
+        "Nefarius.ViGEm.Client.dll": "4458301000b732d115521e99f9936f4edb70d6ceb3036ef158715e0e6b8902e0"
+      }
+    },
+    "SkiaSharp/2.88.9": {
+      "sha512": "sha512-3MD5VHjXXieSHCleRLuaTXmL2pD0mB7CcOB1x2kA1I4bhptf4e3R27iM93264ZYuAq6mkUyX5XbcxnZvMJYc1Q==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/mono/SkiaSharp",
+        "branch": "release/2.88.9",
+        "commit": "9699cdf046a989423a5e5eca68e7fd813486d81c"
+      },
+      "documents": [
+        "SkiaSharp-HarfBuzzSharp-LICENSE.txt",
+        "SkiaSharp-HarfBuzzSharp-THIRD-PARTY-NOTICES.txt"
+      ],
+      "files": {
+        "SkiaSharp.dll": "17ee1284313749f73a5cf5f309318d831741a8d6d397c998c5fc6485843c28bb"
+      }
+    },
+    "SkiaSharp.NativeAssets.Linux/2.88.9": {
+      "sha512": "sha512-cWSaJKVPWAaT/WIn9c8T5uT/l4ETwHxNJTkEOtNKjphNo8AW6TF9O32aRkxqw3l8GUdUo66Bu7EiqtFh/XG0Zg==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/mono/SkiaSharp",
+        "branch": "release/2.88.9",
+        "commit": "9699cdf046a989423a5e5eca68e7fd813486d81c"
+      },
+      "documents": [
+        "SkiaSharp-HarfBuzzSharp-LICENSE.txt",
+        "SkiaSharp-HarfBuzzSharp-THIRD-PARTY-NOTICES.txt"
+      ],
+      "files": {
+        "runtimes/linux-arm/native/libSkiaSharp.so": "ec14c8123bd177c4438634a26703080327bdea52cfec1a6c50f05f0b3434359d",
+        "runtimes/linux-arm64/native/libSkiaSharp.so": "c87c290b8179f095ea7495630cafc2829ec15f64e51a2dd2c03ef98099ea58b2",
+        "runtimes/linux-musl-x64/native/libSkiaSharp.so": "9e33543bb522862910adbd71d2fd4a1394ceb5c5a9aaea75106a7f16fe826314",
+        "runtimes/linux-x64/native/libSkiaSharp.so": "a02cd03f1ebcbb972b811bd836caa02245de764a439794c5d5eebaf063baaa65"
+      }
+    },
+    "SkiaSharp.NativeAssets.macOS/2.88.9": {
+      "sha512": "sha512-Nv5spmKc4505Ep7oUoJ5vp3KweFpeNqxpyGDWyeEPTX2uR6S6syXIm3gj75dM0YJz7NPvcix48mR5laqs8dPuA==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/mono/SkiaSharp",
+        "branch": "release/2.88.9",
+        "commit": "9699cdf046a989423a5e5eca68e7fd813486d81c"
+      },
+      "documents": [
+        "SkiaSharp-HarfBuzzSharp-LICENSE.txt",
+        "SkiaSharp-HarfBuzzSharp-THIRD-PARTY-NOTICES.txt"
+      ],
+      "files": {
+        "runtimes/osx/native/libSkiaSharp.dylib": "169e3c792cd1d364e518c9d693d74580659569dff8bafb4719c7576a556bccc3"
+      }
+    },
+    "SkiaSharp.NativeAssets.Win32/2.88.9": {
+      "sha512": "sha512-wb2kYgU7iy84nQLYZwMeJXixvK++GoIuECjU4ECaUKNuflyRlJKyiRhN1MAHswvlvzuvkrjRWlK0Za6+kYQK7w==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/mono/SkiaSharp",
+        "branch": "release/2.88.9",
+        "commit": "9699cdf046a989423a5e5eca68e7fd813486d81c"
+      },
+      "documents": [
+        "SkiaSharp-HarfBuzzSharp-LICENSE.txt",
+        "SkiaSharp-HarfBuzzSharp-THIRD-PARTY-NOTICES.txt"
+      ],
+      "files": {
+        "runtimes/win-arm64/native/libSkiaSharp.dll": "3e6a5a4ceb45d0e1003f070ae66e2b92e8cc6d5b8fd6e7fc890109f121bac46b",
+        "runtimes/win-x64/native/libSkiaSharp.dll": "9a0d95e8caaa852c70d085af6a40a744242172ad9ea3fd6bc7599875a8a1dbcd",
+        "runtimes/win-x86/native/libSkiaSharp.dll": "57500c7bb65f8db8d2ee40cc8f9736d950789912f7b1ec33944dad6c472c0d99"
+      }
+    },
+    "Tmds.DBus.Protocol/0.21.3": {
+      "sha512": "sha512-hDwB8WsQoyALQKqIbwzS68UKdlnafDm4T/DkO/JrA/YIneP/rKv96SxYPVXeh3FP4i/SXfShrYftKLtciJAIlw==",
+      "declaredLicense": "MIT",
+      "licenseType": "expression",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/tmds/Tmds.DBus.git",
+        "branch": "refs/heads/release/0.21",
+        "commit": "8cb04f66c330b64244e996ff68f685f27f7381a0"
+      },
+      "documents": [
+        "Tmds.DBus-LICENSE.txt"
+      ],
+      "files": {
+        "Tmds.DBus.Protocol.dll": "feb2ec8ded9c8c786eaaf91623bdb58f32a9b552497c02e6828b177140a3b118"
+      }
+    }
+  },
+  "documents": {
+    "Avalonia-LICENSE.txt": {
+      "sha256": "213814d306090074d234d760239ff0f67eb9b8d20eefb4d5631bb39dbe0b769b",
+      "provenance": "upstream-source",
+      "source": "https://raw.githubusercontent.com/AvaloniaUI/Avalonia/627ae9ef921621e27e7aa58df2796fbadb50af88/licence.md"
+    },
+    "Avalonia-NOTICE.md": {
+      "sha256": "0e1ecea8b94eaacec8ade631994149d678940d05163b21d6f4be3d5dccb0a08d",
+      "provenance": "upstream-source",
+      "source": "https://raw.githubusercontent.com/AvaloniaUI/Avalonia/627ae9ef921621e27e7aa58df2796fbadb50af88/NOTICE.md"
+    },
+    "ANGLE-LICENSE.txt": {
+      "sha256": "54aff7276217df9f6b5181613999d208c9e40d2b1d51bf55217837e6871a4a63",
+      "provenance": "nuget-package",
+      "source": "avalonia.angle.windows.natives/2.1.25547.20250602/LICENSE"
+    },
+    "SkiaSharp-HarfBuzzSharp-LICENSE.txt": {
+      "sha256": "89101e35a8c66fd4d6dffc1763259161d35cb564c169714ec227a768c89f2938",
+      "provenance": "nuget-package",
+      "source": "skiasharp/2.88.9/LICENSE.txt"
+    },
+    "SkiaSharp-HarfBuzzSharp-THIRD-PARTY-NOTICES.txt": {
+      "sha256": "21504c46c4c58aa64c1055bd2dcbc5f9a136b4b8c412ed3cc6740e22c5b127f5",
+      "provenance": "nuget-package",
+      "source": "skiasharp.nativeassets.linux/2.88.9/THIRD-PARTY-NOTICES.txt"
+    },
+    "HidSharp-LICENSE.txt": {
+      "sha256": "847173e5c6c8b4149b84203e73271e5b9161bff9eca62b0e06887aeb65ee6577",
+      "provenance": "nuget-package",
+      "source": "hidsharp/2.6.2/LICENSE.txt"
+    },
+    "MicroCom-LICENSE.txt": {
+      "sha256": "6ee769c9ac4dac9abb16b98b1341e9528ff9f4ab685481410d3376d14148f3a9",
+      "provenance": "upstream-source",
+      "source": "https://raw.githubusercontent.com/kekekeks/MicroCom/4b8a38f773c109bad558ee3713d9f16d80776e42/LICENSE"
+    },
+    "ViGEm.NET-LICENSE.txt": {
+      "sha256": "445b3bccd103d39cab7e9b276dd966d60269cf5c44b4b8a118e48bc4c7c4f0db",
+      "provenance": "upstream-source",
+      "source": "https://raw.githubusercontent.com/ViGEm/ViGEm.NET/50422c0f9703059405b133ef61f27b516339f82b/LICENSE"
+    },
+    "Tmds.DBus-LICENSE.txt": {
+      "sha256": "aca3b49277abcc7886ccb2f115603a9f5b15fc3f96019a10c00f2974098b210c",
+      "provenance": "upstream-source",
+      "source": "https://raw.githubusercontent.com/tmds/Tmds.DBus/8cb04f66c330b64244e996ff68f685f27f7381a0/COPYING"
+    },
+    "Inter-OFL-1.1.txt": {
+      "sha256": "4d7d9c95e7d7f2f0ebf76d5e0b344826b74e903a34028ee18ab54bb639e45906",
+      "provenance": "upstream-source",
+      "source": "https://raw.githubusercontent.com/rsms/inter/0a5106e0bde18df09374066bf3a7998e3546307d/LICENSE.txt"
+    },
+    "dotnet-LICENSE.txt": {
+      "sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310",
+      "provenance": "installed-dotnet-distribution",
+      "source": "Ubuntu .NET SDK 10.0.114 / runtime 10.0.14: LICENSE.txt"
+    },
+    "dotnet-ThirdPartyNotices.txt": {
+      "sha256": "2dc8f8c5a39401e928b5784ab564eb8b3ceb99ead3df8f260e0cab7e0bbecc7a",
+      "provenance": "installed-dotnet-distribution",
+      "source": "Ubuntu .NET SDK 10.0.114 / runtime 10.0.14: ThirdPartyNotices.txt"
+    },
+    "Playwright-LICENSE.txt": {
+      "sha256": "45873d00a0dd243596deb4aa23b2493b3d1f0671921bf2538ea431d7380220eb",
+      "provenance": "npm-package",
+      "source": "playwright/1.64.1/LICENSE"
+    },
+    "Playwright-NOTICE.txt": {
+      "sha256": "6d602191187b35b9b01d2cffa01c8469c2c8d9de8a96f1bf868e0f264f51c81d",
+      "provenance": "npm-package",
+      "source": "playwright/1.64.1/NOTICE"
+    }
+  },
+  "appHost": {
+    "sdkVersion": "10.0.114",
+    "runtimeVersion": "10.0.14",
+    "documents": [
+      "dotnet-LICENSE.txt",
+      "dotnet-ThirdPartyNotices.txt"
+    ],
+    "note": "Native app host is distributed; the installed .NET shared runtime is not bundled. These are the supplied Ubuntu distribution notices."
+  },
+  "developmentPackages": {
+    "@playwright/test/1.64.1": {
+      "declaredLicense": "Apache-2.0",
+      "documents": [
+        "Playwright-LICENSE.txt",
+        "Playwright-NOTICE.txt"
+      ],
+      "integrity": "sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg=="
+    },
+    "playwright/1.64.1": {
+      "declaredLicense": "Apache-2.0",
+      "documents": [
+        "Playwright-LICENSE.txt",
+        "Playwright-NOTICE.txt"
+      ],
+      "integrity": "sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA=="
+    },
+    "playwright-core/1.64.1": {
+      "declaredLicense": "Apache-2.0",
+      "documents": [
+        "Playwright-LICENSE.txt",
+        "Playwright-NOTICE.txt"
+      ],
+      "integrity": "sha512-BC4s8y6SEVA6Q1rSxZTto8hI1KUI3xXlHGZgvGqP4IqPdI/a6FX9H29IDNz7vKo9l21b6LfYosScPL6M3xxyDQ=="
+    }
+  },
+  "fontEvidence": {
+    "package": "Avalonia.Fonts.Inter/11.3.22",
+    "asset": "Inter-Regular.ttf",
+    "version": "3.019;git-0a5106e0b",
+    "copyright": "Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter)",
+    "sourceCommit": "0a5106e0bde18df09374066bf3a7998e3546307d",
+    "license": "OFL-1.1",
+    "note": "Exact bytes of all six fonts from the pinned Avalonia revision were found in all three NuGet resource assemblies; embedded metadata identifies OFL-1.1.",
+    "assets": [
+      {
+        "name": "Inter-Bold.ttf",
+        "sha256": "790c108befe859dac2ddbd20af3fbb6917c601b3d544c8a05761519f3b5508fe",
+        "version": "Version 3.019;git-0a5106e0b",
+        "copyright": "Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter)"
+      },
+      {
+        "name": "Inter-Light.ttf",
+        "sha256": "c44ff7a5fde4816f94fc1e5e232b021a812a411339ddd08b0a475ca6e21db810",
+        "version": "Version 3.019;git-0a5106e0b",
+        "copyright": "Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter)"
+      },
+      {
+        "name": "Inter-Medium.ttf",
+        "sha256": "10d48331f5b3c7362ca357b00c17ac4863ad35199b13b0eceb0962c8c1ad7dc9",
+        "version": "Version 3.019;git-0a5106e0b",
+        "copyright": "Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter)"
+      },
+      {
+        "name": "Inter-Regular.ttf",
+        "sha256": "41ab0f707a2bfab8133ccdfcdab52282f5f79e5751f43a264805451c7bb95fb8",
+        "version": "Version 3.019;git-0a5106e0b",
+        "copyright": "Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter)"
+      },
+      {
+        "name": "Inter-SemiBold.ttf",
+        "sha256": "e8cbc2b88bc4268237ff5e251776d3c54edcb14e015a9e66e4883bde4b55f13f",
+        "version": "Version 3.019;git-0a5106e0b",
+        "copyright": "Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter)"
+      },
+      {
+        "name": "Inter-Thin.ttf",
+        "sha256": "b778a52b84f39ba1d3b08553a246643573b33453b5481b4d09c604bccced930d",
+        "version": "Version 3.019;git-0a5106e0b",
+        "copyright": "Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter)"
+      }
+    ]
+  },
+  "projectLicense": {
+    "spdx": "ISC",
+    "sha256": "d451507153665e01076f2f0b0d3a1f42215a206951a24d0ddc01e5a847cd49d4"
+  }
+}

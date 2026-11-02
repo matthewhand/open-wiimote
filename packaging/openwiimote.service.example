@@ -1,0 +1,17 @@
+[Unit]
+Description=OpenWiimote dashboard and controller bridge
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/openwiimote/current
+EnvironmentFile=%h/.config/openwiimote/service.env
+ExecStart=%h/.local/share/openwiimote/current/openwiimote --headless
+Restart=on-failure
+RestartSec=3
+KillSignal=SIGINT
+TimeoutStopSec=20
+UMask=0077
+
+[Install]
+WantedBy=default.target

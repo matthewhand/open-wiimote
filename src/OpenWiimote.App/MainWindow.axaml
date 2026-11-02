@@ -1,0 +1,804 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:OpenWiimote.App.Controls"
+        x:Class="OpenWiimote.App.MainWindow"
+        Title="OpenWiimote"
+        Width="1340"
+        Height="900"
+        MinWidth="1120"
+        MinHeight="740"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="190" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel>
+                <TextBlock Text="OpenWiimote" FontSize="30" FontWeight="Bold" />
+                <TextBlock Classes="muted"
+                           Text="Cross-platform Wiimote console and virtual controller bridge"
+                           Margin="0,2,0,0" />
+            </StackPanel>
+
+            <Border Grid.Column="1"
+                    Background="{DynamicResource PanelBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="20"
+                    Padding="14,8"
+                    VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="8" Height="8" Fill="{Binding StatusBrush}" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding StatusText}" Margin="8,0,0,0" FontSize="12" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="330" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="380" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,14,0">
+                <StackPanel>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="AUTO-CONNECT" />
+
+                            <CheckBox x:Name="AutoConnectCheckBox"
+                                      Content="Connect when a Wiimote appears"
+                                      Click="AutoConnectCheckBox_Changed" />
+
+                            <TextBlock Classes="muted"
+                                       Margin="0,8,0,14"
+                                       Text="The watcher polls USB and Bluetooth HID devices and reconnects after the Wiimote sleeps or moves out of range." />
+
+                            <CheckBox x:Name="AutoEnableEmulationCheckBox"
+                                      Content="Start controller emulation on connect"
+                                      Click="AutoEnableEmulationCheckBox_Changed" />
+
+                            <CheckBox x:Name="IrEnabledCheckBox"
+                                      Content="Switch on the IR camera (pointing)"
+                                      Click="IrEnabledCheckBox_Changed"
+                                      Margin="0,10,0,0" />
+
+                            <TextBlock Classes="muted"
+                                       Margin="0,6,0,0"
+                                       FontSize="11"
+                                       Text="The IR camera needs a sensor bar or another infrared source, and it drains the battery faster." />
+
+                            <Border Height="1"
+                                    Background="{DynamicResource BorderBrush}"
+                                    Margin="0,16,0,14" />
+
+                            <TextBlock Classes="section" Text="TUNING" />
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="108" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Poll interval" VerticalAlignment="Center" FontSize="13" />
+                                <TextBox x:Name="PollIntervalBox" Grid.Column="1" />
+                            </Grid>
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="108" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Reconnect delay" VerticalAlignment="Center" FontSize="13" />
+                                <TextBox x:Name="ReconnectDelayBox" Grid.Column="1" />
+                            </Grid>
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="108" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Stale timeout" VerticalAlignment="Center" FontSize="13" />
+                                <TextBox x:Name="StaleTimeoutBox" Grid.Column="1" />
+                            </Grid>
+
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="108" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Status request" VerticalAlignment="Center" FontSize="13" />
+                                <TextBox x:Name="StatusIntervalBox" Grid.Column="1" />
+                            </Grid>
+
+                            <Button Classes="primary"
+                                    Content="Save settings"
+                                    Click="SaveSettingsButton_Click" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="card" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="QUICK ACTIONS" />
+                            <Button Content="Scan for Wiimotes"
+                                    Click="ScanNowButton_Click"
+                                    Margin="0,0,0,8" />
+                            <Button Classes="danger"
+                                    Content="Disconnect all"
+                                    Click="DisconnectAllButton_Click"
+                                    Margin="0,0,0,8" />
+                            <Button Classes="ghost"
+                                    Content="Open profiles folder"
+                                    Click="OpenProfilesFolderButton_Click"
+                                    HorizontalAlignment="Left" />
+                            <TextBlock x:Name="ProfileFolderText"
+                                       Classes="muted"
+                                       Margin="0,8,0,0" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="card" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="PLATFORM &amp; PAIRING" />
+                            <TextBlock x:Name="PlatformText" Classes="value" Margin="0,0,0,8" />
+                            <TextBlock Classes="muted" Text="BLUETOOTH" Margin="0,0,0,4" />
+                            <TextBlock x:Name="BluetoothHintText" Classes="muted" Margin="0,0,0,12" />
+                            <TextBlock Classes="muted" Text="CONTROLLER BACKEND" Margin="0,0,0,4" />
+                            <TextBlock x:Name="GamepadBackendText" Classes="muted" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border Classes="card">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Classes="section" Text="CONNECTED WIIMOTES" Margin="0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding DeviceCountText}"
+                                       Classes="muted"
+                                       Margin="0" />
+                        </Grid>
+
+                        <ListBox x:Name="DeviceList"
+                                 Classes="devices"
+                                 ItemsSource="{Binding Devices}"
+                                 SelectedItem="{Binding SelectedDevice, Mode=TwoWay}"
+                                 MaxHeight="255">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border Width="42"
+                                                Height="42"
+                                                CornerRadius="12"
+                                                Background="#1B2A47"
+                                                Margin="0,0,12,0">
+                                            <TextBlock Text="W"
+                                                       FontSize="16"
+                                                       FontWeight="Bold"
+                                                       Foreground="{DynamicResource AccentBrush}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="13" />
+                                            <TextBlock Text="{Binding BluetoothAddress}"
+                                                       Classes="muted"
+                                                       FontSize="11" />
+                                            <TextBlock Text="{Binding ProfileText}"
+                                                       Classes="muted"
+                                                       FontSize="11" />
+                                            <ProgressBar Value="{Binding BatteryValue, Mode=OneWay}"
+                                                         Maximum="100"
+                                                         Classes="battery"
+                                                         Foreground="{Binding BatteryBrush}"
+                                                         Margin="0,7,12,0" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding BatteryText}"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       HorizontalAlignment="Right" />
+                                            <TextBlock Text="{Binding ConnectionState}"
+                                                       Classes="muted"
+                                                       FontSize="11"
+                                                       HorizontalAlignment="Right" />
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Classes="card" Margin="0,14,0,0">
+                    <Grid>
+                        <TextBlock x:Name="EmptyDetails"
+                                   Text="No Wiimote connected. Power on a paired Wiimote or press Scan."
+                                   Classes="muted"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Center"
+                                   MaxWidth="360" />
+
+                        <ScrollViewer x:Name="DetailsPanel"
+                                      IsVisible="False"
+                                      VerticalScrollBarVisibility="Auto"
+                                      DataContext="{Binding SelectedDevice}">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Width="52"
+                                            Height="52"
+                                            CornerRadius="15"
+                                            Background="#1B2A47"
+                                            Margin="0,0,14,0">
+                                        <TextBlock Text="W"
+                                                   FontSize="20"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding DisplayName}" FontSize="18" FontWeight="Bold" />
+                                        <TextBlock Text="{Binding BluetoothAddress}" Classes="muted" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding BatteryText}"
+                                                   FontSize="20"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Right" />
+                                        <TextBlock Text="{Binding ExtensionText}"
+                                                   Classes="muted"
+                                                   FontSize="11"
+                                                   HorizontalAlignment="Right" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <ProgressBar Value="{Binding BatteryValue, Mode=OneWay}"
+                                             Maximum="100"
+                                             Classes="battery"
+                                             Foreground="{Binding BatteryBrush}"
+                                             Margin="0,16,0,0" />
+
+                                <Border Height="1"
+                                        Background="{DynamicResource BorderBrush}"
+                                        Margin="0,16,0,14" />
+
+                                <Grid Margin="0,0,0,16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="190" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Profile for this remote"
+                                               VerticalAlignment="Center"
+                                               FontSize="13" />
+                                    <ComboBox x:Name="DeviceProfileComboBox"
+                                              Grid.Column="1"
+                                              SelectionChanged="DeviceProfileComboBox_SelectionChanged"
+                                              ToolTip.Tip="This remote uses the active profile unless it has one of its own" />
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Margin="0,0,12,14">
+                                        <TextBlock Classes="section" Text="BUTTONS" Margin="0,0,0,3" />
+                                        <TextBlock Text="{Binding PressedButtonText}" Classes="value" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Margin="0,0,0,14">
+                                        <TextBlock Classes="section" Text="LAST REPORT" Margin="0,0,0,3" />
+                                        <TextBlock Text="{Binding LastSeenText}" Classes="value" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Margin="0,0,12,14">
+                                        <TextBlock Classes="section" Text="ACCELEROMETER" Margin="0,0,0,3" />
+                                        <TextBlock Text="{Binding AccelText}" Classes="value" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,14">
+                                        <TextBlock Classes="section" Text="TILT" Margin="0,0,0,3" />
+                                        <TextBlock Text="{Binding TiltText}" Classes="value" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,0,14">
+                                        <TextBlock Classes="section" Text="GYRO" Margin="0,0,0,3" />
+                                        <TextBlock Text="{Binding GyroText}" Classes="value" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,14">
+                                        <TextBlock Classes="section" Text="IR POINTER" Margin="0,0,0,3" />
+                                        <TextBlock Text="{Binding IrText}" Classes="value" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
+                                        <TextBlock Classes="section" Text="CONNECTION" Margin="0,0,0,3" />
+                                        <TextBlock Text="{Binding ConnectionState}" Classes="value" />
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" Margin="14,0,0,0">
+                <StackPanel>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="WIIMOTE AVATAR" />
+                            <controls:WiimoteAvatar x:Name="Avatar" Height="245" />
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="150" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Theme" VerticalAlignment="Center" FontSize="13" />
+                                <ComboBox x:Name="ThemeComboBox"
+                                          Grid.Column="1"
+                                          SelectionChanged="ThemeComboBox_SelectionChanged">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+                            <TextBlock Classes="muted"
+                                       Margin="0,8,0,0"
+                                       Text="Tilt follows the accelerometer; yaw needs MotionPlus. Drag the model to inspect every side." />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="card" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="EXTENSION CONTROLLER" />
+                            <controls:ExtensionAvatar x:Name="ExtensionAvatarControl" Height="170" />
+                            <TextBlock Text="{Binding SelectedDevice.ExtensionText}"
+                                       Classes="muted"
+                                       FontSize="11"
+                                       Margin="0,6,0,0"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="card" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="VIRTUAL CONTROLLER" />
+
+                            <CheckBox x:Name="EmulationToggle"
+                                      Content="Enable virtual controller"
+                                      Click="EmulationToggle_Changed" />
+
+                            <TextBlock x:Name="EmulationStatusText"
+                                       Classes="muted"
+                                       Margin="0,8,0,16"
+                                       Text="Off" />
+
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Classes="section" Text="PROFILE" Margin="0" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                    <Button x:Name="NewProfileButton"
+                                            Classes="ghost"
+                                            Content="New"
+                                            ToolTip.Tip="Copy the selected profile under a new name"
+                                            Click="NewProfileButton_Click"
+                                            Margin="0,-4,0,8" />
+                                    <Button Classes="ghost"
+                                            Content="Reload"
+                                            Click="ReloadProfilesButton_Click"
+                                            Margin="0,-4,0,8" />
+                                </StackPanel>
+                            </Grid>
+
+                            <ComboBox x:Name="ProfileComboBox"
+                                      SelectionChanged="ProfileComboBox_SelectionChanged" />
+
+                            <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,8,0,0">
+                                <TextBox x:Name="ProfileNameBox"
+                                         Watermark="Profile name"
+                                         Margin="0,0,8,0" />
+                                <Button x:Name="RenameProfileButton"
+                                        Grid.Column="1"
+                                        Classes="ghost"
+                                        Content="Rename"
+                                        Click="RenameProfileButton_Click"
+                                        Margin="0,0,8,0" />
+                                <Button x:Name="DeleteProfileButton"
+                                        Grid.Column="2"
+                                        Classes="danger"
+                                        Content="Delete"
+                                        Click="DeleteProfileButton_Click" />
+                            </Grid>
+
+                            <TextBlock x:Name="ProfileSummaryText"
+                                       Classes="muted"
+                                       Margin="0,8,0,10" />
+
+                            <Grid ColumnDefinitions="*,86,86,86" Margin="0,0,0,4">
+                                <TextBlock Text="Target" Classes="muted" FontSize="11" />
+                                <TextBlock Grid.Column="1"
+                                           Text="Wiimote"
+                                           Classes="muted"
+                                           FontSize="11"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Grid.Column="2"
+                                           Text="Nunchuk"
+                                           Classes="muted"
+                                           FontSize="11"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Grid.Column="3"
+                                           Text="Classic"
+                                           Classes="muted"
+                                           FontSize="11"
+                                           HorizontalAlignment="Center" />
+                            </Grid>
+
+                            <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl x:Name="MappingItemsControl" ItemsSource="{Binding ProfileMappings}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,2,0,2" ColumnDefinitions="*,86,86,86">
+                                                <TextBlock Text="{Binding Target}"
+                                                           Foreground="{DynamicResource MutedBrush}"
+                                                           FontSize="12"
+                                                           VerticalAlignment="Center" />
+                                                <ComboBox Grid.Column="1"
+                                                          x:Name="MappingComboBox"
+                                                          Tag="{Binding Target}"
+                                                          Loaded="MappingComboBox_Loaded"
+                                                          SelectionChanged="MappingComboBox_SelectionChanged"
+                                                          FontSize="11"
+                                                          MinHeight="26">
+                                                    <ComboBoxItem Content="Unmapped" />
+                                                    <ComboBoxItem Content="Two" />
+                                                    <ComboBoxItem Content="One" />
+                                                    <ComboBoxItem Content="A" />
+                                                    <ComboBoxItem Content="B" />
+                                                    <ComboBoxItem Content="Plus" />
+                                                    <ComboBoxItem Content="Minus" />
+                                                    <ComboBoxItem Content="Home" />
+                                                    <ComboBoxItem Content="Up" />
+                                                    <ComboBoxItem Content="Down" />
+                                                    <ComboBoxItem Content="Left" />
+                                                    <ComboBoxItem Content="Right" />
+                                                </ComboBox>
+                                                <ComboBox Grid.Column="2"
+                                                          x:Name="NunchukMappingComboBox"
+                                                          Tag="{Binding Target}"
+                                                          Loaded="MappingComboBox_Loaded"
+                                                          SelectionChanged="ExtensionMappingComboBox_SelectionChanged"
+                                                          FontSize="11"
+                                                          MinHeight="26">
+                                                    <ComboBoxItem Content="Unmapped" />
+                                                    <ComboBoxItem Content="C" />
+                                                    <ComboBoxItem Content="Z" />
+                                                </ComboBox>
+                                                <ComboBox Grid.Column="3"
+                                                          x:Name="ClassicMappingComboBox"
+                                                          Tag="{Binding Target}"
+                                                          Loaded="MappingComboBox_Loaded"
+                                                          SelectionChanged="ExtensionMappingComboBox_SelectionChanged"
+                                                          FontSize="11"
+                                                          MinHeight="26">
+                                                    <ComboBoxItem Content="Unmapped" />
+                                                    <ComboBoxItem Content="A" />
+                                                    <ComboBoxItem Content="B" />
+                                                    <ComboBoxItem Content="X" />
+                                                    <ComboBoxItem Content="Y" />
+                                                    <ComboBoxItem Content="L" />
+                                                    <ComboBoxItem Content="R" />
+                                                    <ComboBoxItem Content="ZL" />
+                                                    <ComboBoxItem Content="ZR" />
+                                                    <ComboBoxItem Content="Plus" />
+                                                    <ComboBoxItem Content="Minus" />
+                                                    <ComboBoxItem Content="Home" />
+                                                    <ComboBoxItem Content="Up" />
+                                                    <ComboBoxItem Content="Down" />
+                                                    <ComboBoxItem Content="Left" />
+                                                    <ComboBoxItem Content="Right" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                            <TextBlock Classes="section" Text="EXTENSION STICKS" Margin="0,16,0,4" />
+                            <TextBlock Classes="muted"
+                                       FontSize="11"
+                                       Text="Where the sticks of a plugged in Nunchuk or Classic Controller go. The dead zone and the sensitivity are part of the profile file." />
+
+                            <Grid ColumnDefinitions="*,150" Margin="0,8,0,4">
+                                <TextBlock Text="Nunchuk stick" VerticalAlignment="Center" FontSize="13" />
+                                <ComboBox x:Name="NunchukStickComboBox"
+                                          Grid.Column="1"
+                                          SelectionChanged="ExtensionStickComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="LeftStick" />
+                                    <ComboBoxItem Content="RightStick" />
+                                    <ComboBoxItem Content="Unmapped" />
+                                </ComboBox>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,150" Margin="0,0,0,4">
+                                <TextBlock Text="Classic left stick" VerticalAlignment="Center" FontSize="13" />
+                                <ComboBox x:Name="ClassicLeftStickComboBox"
+                                          Grid.Column="1"
+                                          SelectionChanged="ExtensionStickComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="LeftStick" />
+                                    <ComboBoxItem Content="RightStick" />
+                                    <ComboBoxItem Content="Unmapped" />
+                                </ComboBox>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,150" Margin="0,0,0,4">
+                                <TextBlock Text="Classic right stick" VerticalAlignment="Center" FontSize="13" />
+                                <ComboBox x:Name="ClassicRightStickComboBox"
+                                          Grid.Column="1"
+                                          SelectionChanged="ExtensionStickComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="LeftStick" />
+                                    <ComboBoxItem Content="RightStick" />
+                                    <ComboBoxItem Content="Unmapped" />
+                                </ComboBox>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="card" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="TILT STEERING" />
+
+                            <CheckBox x:Name="TiltSteeringCheckBox"
+                                      Content="Steer with the accelerometer"
+                                      Checked="TiltSteeringCheckBox_Changed"
+                                      Unchecked="TiltSteeringCheckBox_Changed" />
+
+                            <TextBlock Classes="muted"
+                                       Margin="0,6,0,12"
+                                       Text="Hold the remote horizontally like a NES controller: rolling it steers, pitching it looks up and down. The axis selector picks the roll, the pitch or the total tilt for the single axis modes." />
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="150" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Target" VerticalAlignment="Center" FontSize="13" />
+                                <ComboBox x:Name="TiltTargetComboBox" Grid.Column="1">
+                                    <ComboBoxItem Content="LeftStick (Steering + Pitch)" />
+                                    <ComboBoxItem Content="LeftStickX" />
+                                    <ComboBoxItem Content="LeftStickY" />
+                                    <ComboBoxItem Content="RightStickX" />
+                                    <ComboBoxItem Content="RightStickY" />
+                                    <ComboBoxItem Content="LeftTrigger" />
+                                    <ComboBoxItem Content="RightTrigger" />
+                                </ComboBox>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="150" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Tilt axis" VerticalAlignment="Center" FontSize="13" />
+                                <ComboBox x:Name="TiltAxisComboBox" Grid.Column="1">
+                                    <ComboBoxItem Content="X" />
+                                    <ComboBoxItem Content="Y" />
+                                    <ComboBoxItem Content="Z" />
+                                </ComboBox>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="150" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Max tilt (degrees)" VerticalAlignment="Center" FontSize="13" />
+                                <NumericUpDown x:Name="MaxTiltBox"
+                                               Grid.Column="1"
+                                               Minimum="5"
+                                               Maximum="80"
+                                               Increment="1"
+                                               FormatString="0" />
+                            </Grid>
+
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="150" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Sensitivity" VerticalAlignment="Center" FontSize="13" />
+                                <NumericUpDown x:Name="SensitivityBox"
+                                               Grid.Column="1"
+                                               Minimum="0.1"
+                                               Maximum="3"
+                                               Increment="0.1"
+                                               FormatString="0.0" />
+                            </Grid>
+
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="150" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Dead zone" VerticalAlignment="Center" FontSize="13" />
+                                <NumericUpDown x:Name="DeadZoneBox"
+                                               Grid.Column="1"
+                                               Minimum="0"
+                                               Maximum="0.5"
+                                               Increment="0.01"
+                                               FormatString="0.00" />
+                            </Grid>
+
+                            <CheckBox x:Name="InvertSteeringCheckBox"
+                                      Content="Invert steering"
+                                      Margin="0,0,0,6" />
+                            <CheckBox x:Name="InvertPitchCheckBox"
+                                      Content="Invert pitch"
+                                      Margin="0,0,0,6" />
+                            <CheckBox x:Name="InvertAxisCheckBox"
+                                      Content="Invert tilt axis"
+                                      Margin="0,0,0,6" />
+
+                            <TextBlock Classes="muted"
+                                       Margin="0,0,0,12"
+                                       Text="Invert steering and invert pitch flip the combined mode, invert tilt axis flips the single axis modes." />
+
+                            <Button x:Name="SaveTiltSettingsButton"
+                                    Classes="primary"
+                                    Content="Save to profile"
+                                    Click="SaveTiltSettingsButton_Click" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="card" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="WIIMOTE CONTROLS" />
+
+                            <TextBlock Text="Player LEDs"
+                                       Foreground="{DynamicResource MutedBrush}"
+                                       FontSize="12"
+                                       Margin="0,0,0,8" />
+
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ToggleButton x:Name="Led1Button"
+                                              Classes="led"
+                                              Content="1"
+                                              Tag="16"
+                                              Margin="0,0,7,0"
+                                              Click="LedButton_Click" />
+                                <ToggleButton x:Name="Led2Button"
+                                              Grid.Column="1"
+                                              Classes="led"
+                                              Content="2"
+                                              Tag="32"
+                                              Margin="0,0,7,0"
+                                              Click="LedButton_Click" />
+                                <ToggleButton x:Name="Led3Button"
+                                              Grid.Column="2"
+                                              Classes="led"
+                                              Content="3"
+                                              Tag="64"
+                                              Margin="0,0,7,0"
+                                              Click="LedButton_Click" />
+                                <ToggleButton x:Name="Led4Button"
+                                              Grid.Column="3"
+                                              Classes="led"
+                                              Content="4"
+                                              Tag="128"
+                                              Click="LedButton_Click" />
+                            </Grid>
+
+                            <ToggleButton x:Name="RumbleToggle"
+                                          Classes="rumble"
+                                          Content="Rumble"
+                                          Click="RumbleToggle_Changed" />
+
+                            <TextBlock Classes="muted"
+                                       Margin="0,10,0,0"
+                                       Text="LED and rumble changes apply to every connected Wiimote." />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <Border Grid.Row="2" Classes="card" Margin="0,14,0,0" Padding="14">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Classes="section" Text="ACTIVITY" Margin="0" />
+                    <Button Grid.Column="1"
+                            Classes="ghost"
+                            Content="Clear"
+                            Click="ClearLogButton_Click" />
+                </Grid>
+
+                <ListBox x:Name="ActivityList"
+                         Grid.Row="1"
+                         Classes="logs"
+                         ItemsSource="{Binding LogEntries}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="62" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding TimeText}"
+                                           Foreground="{DynamicResource MutedBrush}"
+                                           FontFamily="Consolas, Menlo, monospace"
+                                           FontSize="11" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Message}"
+                                           FontSize="12" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>OpenWiimote.Platform.MacOS</RootNamespace>
+    <AssemblyName>OpenWiimote.Platform.MacOS</AssemblyName>
+    <Description>macOS platform backend for OpenWiimote.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenWiimote.Core\OpenWiimote.Core.csproj" />
+  </ItemGroup>
+
+</Project>

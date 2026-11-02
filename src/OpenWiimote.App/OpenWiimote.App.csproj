@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>OpenWiimote.App</RootNamespace>
+    <AssemblyName>OpenWiimote</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    <Description>Cross-platform Wiimote configuration and virtual controller bridge.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.22" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="wwwroot\**\*.*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenWiimote.Core\OpenWiimote.Core.csproj" />
+    <ProjectReference Include="..\OpenWiimote.Platform.Linux\OpenWiimote.Platform.Linux.csproj" />
+    <ProjectReference Include="..\OpenWiimote.Platform.MacOS\OpenWiimote.Platform.MacOS.csproj" />
+    <ProjectReference Include="..\OpenWiimote.Platform.Windows\OpenWiimote.Platform.Windows.csproj" />
+  </ItemGroup>
+
+</Project>
