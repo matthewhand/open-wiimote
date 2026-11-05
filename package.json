@@ -1,26 +1,27 @@
 {
-  "name": "openwiimote",
+  "name": "open-wiimote",
   "version": "1.0.0",
-  "description": "",
+  "description": "Local test tooling for OpenWiimote",
   "main": "index.js",
   "directories": {
     "doc": "docs",
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node scripts/test-math.cjs",
+    "test:browser": "playwright test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/matthewhand/openwiimote.git"
+    "url": "git+https://github.com/matthewhand/open-wiimote.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/matthewhand/openwiimote/issues"
+    "url": "https://github.com/matthewhand/open-wiimote/issues"
   },
-  "homepage": "https://github.com/matthewhand/openwiimote#readme",
+  "homepage": "https://github.com/matthewhand/open-wiimote#readme",
   "devDependencies": {
     "@playwright/test": "^1.64.1"
   }

@@ -32,3 +32,11 @@ includes file checksums, the ISC license and the complete reviewed third-party n
   workflow. Release publication does not enable it.
 - This is a prerelease: physical acceptance remains partial as described in
   [release notes](Release-Notes.md). MotionPlus is an unavailable experimental stub.
+
+## Source update, 6 November 2026
+
+The source update copies reviewed files onto the existing public history. It imports no
+private commits, discussions, settings or controller identifiers. Original sanitised
+fixtures are retained. The rc.2 download is unchanged; later helpers are not an integrated
+wizard. Local verification and the remaining native-platform work are recorded in the
+README and platform support guide. GitHub Actions remains disabled.

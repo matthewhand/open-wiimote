@@ -15,7 +15,7 @@ Use a clean, committed source checkout with an already populated .NET package ca
 restore assets. Put artifacts outside the checkout. On a Linux x64 or arm64 build host:
 
 ```sh
-./scripts/package-linux.sh 0.1.0-rc.2 /absolute/path/to/release-artifacts
+./scripts/package-linux.sh 0.1.0-rc.2 /absolute/path/to/private-artifacts
 ```
 
 The script does not restore dependencies, install software, touch controllers or change a
@@ -32,7 +32,7 @@ rejects obvious private/configuration paths and symlinks; it is not a complete s
 licensing audit. No archive from an earlier build is overwritten.
 
 ```sh
-cd /absolute/path/to/release-artifacts
+cd /absolute/path/to/private-artifacts
 sha256sum -c openwiimote-0.1.0-rc.2-linux-x64.tar.gz.sha256
 ```
 

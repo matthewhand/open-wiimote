@@ -32,6 +32,7 @@ process.env.OPENWIIMOTE_PLAYWRIGHT_CONFIG_HOME = CONFIG_HOME;
 
 export default defineConfig({
   testDir: './tests/OpenWiimote.App',
+  testMatch: '**/*.spec.ts', // Node math suites run separately through npm test.
   outputDir: path.join(CONFIG_HOME, 'test-results'),
   timeout: 60_000,
   expect: { timeout: 10_000 },

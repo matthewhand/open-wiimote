@@ -1,8 +1,9 @@
-# Original Wii Remote release candidate
+# Linux rc.2 baseline
 
-Status: public prerelease **0.1.0-rc.2**, Linux x64. Hardware acceptance remains partial.
-ISC and full dependency notices are included. See `PUBLIC-RELEASE-PROVENANCE.json` for the
-reviewed source export and binary build provenance.
+The Linux x64 prerelease `0.1.0-rc.2` is publicly available from the
+[release page](https://github.com/matthewhand/open-wiimote/releases/tag/v0.1.0-rc.2).
+Its `release.json` identifies the exact binary source. Hardware acceptance remains partial.
+ISC and full dependency notices are included. Newer source is not a replacement rc.2 binary.
 
 ## Included
 
@@ -32,7 +33,9 @@ remain compatible, but the stub supplies no gyro readings. Linux kernel-owned ex
 handling, Windows hardware behavior and macOS virtual output have their documented limits;
 macOS has no implemented virtual-controller backend.
 
-IR-mouse/display additions are outside this release. No kernel patch is required.
+The current release excludes local, uncommitted IR-mouse/display additions in the protected
+development checkout. That source and its settings were preserved separately. No kernel
+patch is installed or included as a requirement of this candidate.
 
 Dashboard action routes require POST, including scan, disconnect, profile reload and log
 clearing. External clients that previously used GET for those actions must update.
@@ -44,3 +47,10 @@ application reconnect restored its profile and controller. A prior button record
 expired without capturing the sequence. Both remotes are not yet accepted together;
 physical Bluetooth reconnects, neutral flat pose, full pitch and a game session remain
 unverified. Passing synthetic tests must not be described as completing these checks.
+
+## Source after rc.2
+
+Source adds separately tested calibration/pose helpers. The guided dashboard, IR
+and pointer experiments remain a separate draft review scope; helpers alone do not ship
+those features. See [platform status](Platform-Support.md) and [the roadmap](../ROADMAP.md).
+Windows and macOS require native acceptance; macOS virtual output is not implemented.

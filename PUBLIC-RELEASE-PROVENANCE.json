@@ -29,5 +29,12 @@
   "runtimeSource": "All 64 src/ files match the reviewed original source; export changes affect documentation, test identifiers, package metadata and a diagnostic tool default.",
   "reviewedOriginalSourceCommit": "dd74118c8adf55abf543a596fbc25d3bfbff1136",
   "reviewedOriginalSourceTree": "ba24fa3d1466a9ab1c851c1e733fe008d7406310",
-  "binarySource": "Public source snapshot commit and tree recorded in the packaged release.json."
+  "binarySource": "Public source snapshot commit and tree recorded in the packaged release.json.",
+  "sourceAfterRelease": {
+    "date": "2026-11-06",
+    "reviewedPrivateSource": "a2911c3922c268319bcbac7c75ddc57cb5046591",
+    "previousPublicSource": "510e2c1c691d555c9f2d0183d1c3ff838cbfa575",
+    "scope": "Reviewed helpers, documentation, local verification and truthful macOS placeholder message.",
+    "releaseBinary": "v0.1.0-rc.2 archive is unchanged; its release.json identifies its build source."
+  }
 }

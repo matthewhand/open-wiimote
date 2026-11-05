@@ -4,26 +4,26 @@ namespace OpenWiimote.Platform.MacOS;
 
 public sealed class MacOSGamepadProvider : IVirtualGamepadProvider
 {
-    private const string EntitlementMessage =
-        "macOS virtual controllers require Apple's restricted " +
-        "com.apple.developer.hid.virtual.device entitlement. " +
-        "HID monitoring, diagnostics, LED and rumble controls work without it; " +
-        "controller emulation stays disabled in unsigned builds.";
+    private const string UnavailableMessage =
+        "macOS virtual-gamepad output is not implemented in this build. " +
+        "Signing the app or granting permissions does not enable this placeholder. " +
+        "HID monitoring and controls require separate native verification; " +
+        "controller emulation remains unavailable.";
 
     public string BackendName => "macOS virtual HID";
 
-    public string BackendDescription => EntitlementMessage;
+    public string BackendDescription => UnavailableMessage;
 
     public bool Probe(out string? error)
     {
-        error = EntitlementMessage;
+        error = UnavailableMessage;
         return false;
     }
 
     public bool TryCreate(out IVirtualGamepad? gamepad, out string? error)
     {
         gamepad = null;
-        error = EntitlementMessage;
+        error = UnavailableMessage;
         return false;
     }
 
