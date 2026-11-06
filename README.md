@@ -12,6 +12,11 @@ Use a powered sensor bar to point and click, or map buttons and tilt to a virtua
   <a href="docs/Linux-Setup.md">Linux setup</a>
 </p>
 
+<p align="center">
+  <a href="docs/images/open-wiimote-windows.png"><img src="docs/images/open-wiimote-windows.png" alt="OpenWiimote on Windows with a real connected Wii Remote, live infrared dots and the Wiimote avatar" width="1100"></a><br>
+  <sub>Windows rc.11 with a real Wii Remote: live IR dots and the tilt avatar. Device addresses and the local profile path are redacted.</sub>
+</p>
+
 ## Point, click and play
 
 OpenWiimote connects original Wii Remotes through your operating system's Bluetooth/HID
