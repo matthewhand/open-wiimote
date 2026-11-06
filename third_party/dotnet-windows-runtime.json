@@ -1,0 +1,20 @@
+{
+  "win-x64": {
+    "version": "10.0.14",
+    "url": "https://builds.dotnet.microsoft.com/dotnet/Runtime/10.0.14/dotnet-runtime-10.0.14-win-x64.zip",
+    "sha512": "a176095f1db69b42c81acc60940744078d6bf2d2ac643e418342aa9c81889f4bd13e42f4621b131f9e77e4bc781ad46e375956219df9a4f979031d2a5a8d93cd",
+    "documents": {
+      "DOTNET-WINDOWS-LICENSE.txt": "7f6839a61ce892b79c6549e2dc5a81fdbd240a0b260f8881216b45b7fda8b45d",
+      "DOTNET-WINDOWS-ThirdPartyNotices.txt": "deb4427a295e1ed474b0d81c5a0d972c1b550b9a715cda939cdfa9236b1b418f"
+    }
+  },
+  "win-arm64": {
+    "version": "10.0.14",
+    "url": "https://builds.dotnet.microsoft.com/dotnet/Runtime/10.0.14/dotnet-runtime-10.0.14-win-arm64.zip",
+    "sha512": "8690d0dd94ce1d4df66dd34f85b9f86e81ed5db0c4e5fcd281e5d379b9abd0018547556d1d7e8c0ce33a55ac69835c788c8da7c583fc0f58ccbdd6de227a0294",
+    "documents": {
+      "DOTNET-WINDOWS-LICENSE.txt": "7f6839a61ce892b79c6549e2dc5a81fdbd240a0b260f8881216b45b7fda8b45d",
+      "DOTNET-WINDOWS-ThirdPartyNotices.txt": "deb4427a295e1ed474b0d81c5a0d972c1b550b9a715cda939cdfa9236b1b418f"
+    }
+  }
+}

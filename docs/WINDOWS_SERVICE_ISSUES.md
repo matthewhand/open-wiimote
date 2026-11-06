@@ -1,52 +1,21 @@
-# Windows Bluetooth activation notes
+# Windows Bluetooth troubleshooting
 
-A field note from a handoff investigation, not a finished report. It records the errors one
-Windows session printed while trying to bring up the Bluetooth services for a paired remote,
-and what was guessed from them. The guesses were not checked against Microsoft's
-documentation, and none of it was reproduced on the Linux machine this repository is
-developed on. Treat everything below the error codes as a hypothesis.
+Use [Windows setup](Windows-Setup.md) for the current pairing flow. The app has two paths:
+the Wiimote-specific native helper and **Open Windows pairing wizard**. In the verified
+Windows 11 ARM session, the native helper timed out with code 258 while the built-in wizard
+successfully paired an original remote. A timeout alone does not establish its cause.
 
-## What was observed
+- Close an old PIN dialog before starting another pairing flow. Press and release red SYNC
+  while discovery runs. Use a no-code option only if Windows offers one; do not guess a PIN.
+- A saved pairing and actual HID streaming are separate checks. Confirm the remote appears
+  in OpenWiimote and that live button/accelerometer values update.
+- The native helper enables only the HID service, preserves existing bonds and does not
+  install a Bluetooth driver. It stops/reaps its own scan before opening the system wizard.
+- Mouse mode uses the built-in Windows input API and needs no ViGEmBus driver. The native
+  ARM64 app supports mouse mode; the x64 requirement concerns virtual Xbox gamepads only.
+- Check that Bluetooth is on, the remote is charged and nearby, and another host is not
+  holding its connection. Keep logs/device identifiers private when investigating failures.
+- Do not add unrelated serial-port services, automatically erase bonds, weaken Windows
+  protections or run the whole application as administrator to work around a pairing issue.
 
-Activating the two Bluetooth service GUIDs failed, and so did a device restart:
-
-| Operation | Result |
-|-----------|--------|
-| HID service GUID `{00001124-0000-1000-8000-00805f9b34fb}` | error 87, `ERROR_INVALID_PARAMETER` |
-| SPP service GUID `{00001101-0000-1000-8000-00805f9b34fb}` | error 1060, `ERROR_SERVICE_DOES_NOT_EXIST` |
-| `pnputil /restart-device` | `Access is denied` |
-
-The command lines and the full output were not kept, so the exact call behind each code is
-not recorded either.
-
-## What it might mean (unverified)
-
-- Error 87 is "invalid parameter", so the call itself may have been malformed rather than the
-  Bluetooth stack being broken.
-- Error 1060 says the SPP service does not exist. Windows only publishes that profile when
-  the stack that owns the adapter offers it.
-- `Access is denied` from `pnputil` is the ordinary answer for a non-elevated shell. It says
-  nothing about the adapter.
-
-## What was true of that machine
-
-- Source tree: `C:\Users\matth\Documents\wiimote`, reported as not being a Git checkout at
-  the time. This repository is a Git checkout on Linux; there is no Windows tree here to
-  compare it against.
-- .NET SDK 8.0.426, runtime 8.0.32. The projects in this repository target `net10.0`, and CI
-  installs 10.0.x, so that machine's SDK was older than what the build now expects.
-- Avalonia 11.3.22 and HidSharp 2.6.2, which still match the project files.
-
-## What to try next
-
-These need an elevated shell on the Windows machine, and they are the checks that would turn
-the hypotheses above into a cause:
-
-1. Confirm the Bluetooth Support Service (`bthserv`) is running and that the adapter is
-   enabled in Device Manager.
-2. Write down the exact command that returned 87, run it again as administrator, and keep the
-   full output this time.
-3. Confirm that the OEM Bluetooth stack installs the HID and SPP profiles. A generic or
-   half-installed driver is the usual reason a profile GUID is missing.
-4. Pair the remote from the Windows Bluetooth settings first. This app only opens HID devices
-   the operating system already knows, so nothing in it can work before that step does.
+Older service-activation errors were not reproduced and are not a current setup recipe.

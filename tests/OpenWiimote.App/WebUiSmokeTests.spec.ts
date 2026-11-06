@@ -111,7 +111,7 @@ test.describe('headless web UI', () => {
       route.fulfill({ json: { status: 'ok', authRequired: false } })
     );
     await page.route('**/api/state', (route) =>
-      route.fulfill({ json: stateWith([device('device-1', 'Remote', '02:00:00:00:00:01', 70)]) })
+      route.fulfill({ json: stateWith([device('device-1', 'Remote', '02:11:AB:33:CD:55', 70)]) })
     );
 
     await page.goto('/');

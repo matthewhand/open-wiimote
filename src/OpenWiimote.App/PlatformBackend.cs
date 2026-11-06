@@ -37,8 +37,8 @@ public static class PlatformBackend
         {
             if (OperatingSystem.IsWindows())
             {
-                return "Press 1 + 2 on the remote to enter sync mode, then run devicepairingwizard.exe " +
-                       "to pair the Wiimote. After pairing, connect it from the app.";
+                return "Choose Pair a Wiimote in Windows, press the red SYNC button and find your remote. " +
+                       "The app handles its special PIN. After bonding, wake it with a single button press.";
             }
 
             if (OperatingSystem.IsLinux())
@@ -75,6 +75,19 @@ public static class PlatformBackend
         }
 
         return new UnsupportedGamepadProvider();
+    }
+
+    public static OpenWiimote.Core.Pointer.IPointerBackend CreatePointerBackend()
+    {
+        if (OperatingSystem.IsWindows()) return new WindowsPointerBackend();
+        if (OperatingSystem.IsLinux()) return new LinuxPointerBackend();
+        return new NoPointerBackend();
+    }
+    private sealed class NoPointerBackend : OpenWiimote.Core.Pointer.IPointerBackend
+    {
+        public IReadOnlyList<OpenWiimote.Core.Pointer.PointerDisplay> GetDisplays() => [];
+        public OpenWiimote.Core.Pointer.IPointerOutput Create(OpenWiimote.Core.Pointer.PointerDisplay display)
+            => throw new PlatformNotSupportedException("Pointer output is unavailable on this platform.");
     }
 
     public static void OpenFolder(string path)

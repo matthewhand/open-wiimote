@@ -70,14 +70,22 @@ def validate(repo, deps, sdk_version):
     return manifest, runtime_packages
 
 
-def bundle(repo, deps_file, output, sdk_version):
+def bundle(repo, deps_file, output, sdk_version, rid=None):
     manifest, count = validate(repo, json.loads(deps_file.read_text()), sdk_version)
     deps = json.loads(deps_file.read_text())
+    if rid is not None and (rid not in ('win-x64', 'win-arm64') or not deps.get('runtimeTarget', {}).get('name', '').endswith('/' + rid)):
+        raise NoticeError('Runtime identifier does not match the published dependency graph')
     for name, info in deps['libraries'].items():
         if info['type'] != 'package':
             continue
         for relative, expected in manifest['packages'][name]['files'].items():
-            actual = safe_document(output, relative)
+            published = relative
+            if rid is not None and relative.startswith('runtimes/'):
+                parts = relative.split('/')
+                if len(parts) < 4 or parts[1] != rid:
+                    continue
+                published = parts[-1]
+            actual = safe_document(output, published)
             if digest(actual) != expected:
                 raise NoticeError('Published dependency file differs from reviewed package: ' + relative)
     # All inputs are validated before creating or changing the output directory.
@@ -99,10 +107,11 @@ def main():
     parser.add_argument('--deps', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--sdk-version', required=True)
+    parser.add_argument('--rid', choices=('win-x64', 'win-arm64'))
     parser.add_argument('--repo', type=Path, default=Path(__file__).resolve().parents[1])
     args = parser.parse_args()
     try:
-        count = bundle(args.repo, args.deps, args.output, args.sdk_version)
+        count = bundle(args.repo, args.deps, args.output, args.sdk_version, args.rid)
     except (NoticeError, OSError, KeyError, json.JSONDecodeError) as error:
         print('Notice validation failed: ' + str(error), file=sys.stderr)
         return 2

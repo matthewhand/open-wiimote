@@ -125,19 +125,7 @@ public sealed class ProfileStore
         profile.ModifiedAt = DateTime.Now;
         profile.Version = MappingProfile.CurrentVersion;
         var path = Path.Combine(Directory, SanitizeFileName(profile.Name) + ".json");
-        // Each save needs its own temporary file: overlapping dashboard requests
-        // otherwise write and move the same path, corrupting or failing a save.
-        var temp = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
-        var json = JsonSerializer.Serialize(profile, _jsonOptions);
-        try
-        {
-            File.WriteAllText(temp, json);
-            File.Move(temp, path, overwrite);
-        }
-        finally
-        {
-            if (File.Exists(temp)) File.Delete(temp);
-        }
+        AtomicTextFile.Write(path, JsonSerializer.Serialize(profile, _jsonOptions), overwrite);
     }
 
     /// <summary>
@@ -473,7 +461,7 @@ public sealed class ProfileStore
     {
         try
         {
-            var profile = JsonSerializer.Deserialize<MappingProfile>(File.ReadAllText(path), _jsonOptions);
+            var profile = JsonSerializer.Deserialize<MappingProfile>(AtomicTextFile.Read(path), _jsonOptions);
             return profile is null ? null : Migrate(profile);
         }
         catch

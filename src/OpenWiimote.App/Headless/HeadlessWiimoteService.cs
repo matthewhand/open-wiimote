@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using OpenWiimote.Core.Pointer;
 using System.Text.Json;
 using OpenWiimote.Core.Mapping;
 using OpenWiimote.Core.Experimental;
@@ -34,6 +35,8 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
     private readonly ConcurrentQueue<ServerLogEntry> _logs = new();
     private readonly string _logFilePath;
     private AppSettings _settings;
+    private readonly PlayerSlotAssignments _playerSlots;
+    public PointerController Pointer { get; }
     private MappingProfile? _activeProfile;
     private bool _emulationEnabled;
     private bool _rumbleEnabled;
@@ -52,13 +55,20 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
     }
 
     internal HeadlessWiimoteService(WiimoteWatcher watcher, IVirtualGamepadProvider provider,
-        SettingsStore settingsStore, ProfileStore profileStore)
+        SettingsStore settingsStore, ProfileStore profileStore, IPointerBackend? pointerBackend = null)
     {
         _watcher = watcher;
         _gamepadProvider = provider;
         _settingsStore = settingsStore;
         _profileStore = profileStore;
         _settings = _settingsStore.Load();
+        Pointer = new(pointerBackend ?? PlatformBackend.CreatePointerBackend(), _settings.Pointer, next =>
+        {
+            var previous = _settings.Pointer; _settings.Pointer = next;
+            try { _settingsStore.Save(_settings); } catch { _settings.Pointer = previous; throw; }
+        });
+        Pointer.InputClaimed += NeutralizePointerController;
+        _playerSlots = new PlayerSlotAssignments(_settings.PlayerSlots);
         _logFilePath = Path.Combine(_settingsStore.LogsDirectory, $"headless_{DateTime.Now:yyyyMMdd_HHmmss}.log");
         _activeProfile = _profileStore.LoadProfile(_settings.PreferredProfile) ?? _profileStore.LoadProfile("Default");
         _emulationEnabled = _settings.AutoEnableEmulation;
@@ -117,7 +127,7 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
                     state.GyroY,
                     state.GyroZ,
                     session.Profile?.Name,
-                    session.Connection.LedMask);
+                    session.Connection.LedMask, session.PlayerNumber);
             }
         }).ToArray();
 
@@ -149,7 +159,37 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
             mappings,
             devices,
             logs,
-            _activeProfile?.ExtensionStick ?? new ExtensionStickMapping());
+            _activeProfile?.ExtensionStick ?? new ExtensionStickMapping(), Pointer.Snapshot());
+    }
+
+    private void NeutralizePointerController(string key)
+    {
+        foreach (var session in GetSessions().Where(s => s.Connection.DeviceKey == key))
+            lock (session.Gate) { try { session.Gamepad?.Submit(XboxGamepadState.Neutral); } catch { } }
+    }
+
+    public void PointerAction(PointerRequest request)
+    {
+        switch (request.Action)
+        {
+            case "select":
+                var previous = Pointer.Snapshot().DeviceKey;
+                Pointer.Select(request.DeviceKey ?? "", request.DisplayId ?? "");
+                foreach (var session in GetSessions())
+                {
+                    if (session.Connection.DeviceKey == previous && previous != request.DeviceKey && !_settings.IrEnabled)
+                        session.Connection.SetIrEnabled(false);
+                    if (session.Connection.DeviceKey == request.DeviceKey && !session.Connection.SetIrEnabled(true))
+                        throw new ArgumentException("The IR camera could not be opened. Check the Wii Remote input permissions.");
+                }
+                break;
+            case "enable": Pointer.Enable(true); break;
+            case "disable": Pointer.Enable(false); break;
+            case "calibrate": Pointer.BeginCalibration(); break;
+            case "capture": Pointer.CaptureCorner(); break;
+            case "cancel": Pointer.CancelCalibration(); break;
+            default: throw new ArgumentException("Unknown pointer action.");
+        }
     }
 
     public async Task ScanAsync() => await _watcher.ScanOnceAsync().ConfigureAwait(false);
@@ -700,6 +740,7 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
         }
 
         _disposed = true;
+        Pointer.Dispose();
         _watcher.DeviceConnected -= OnDeviceConnected;
         _watcher.DeviceDisconnected -= OnDeviceDisconnected;
         _watcher.Log -= OnWatcherLog;
@@ -804,7 +845,8 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
         lock (_gate)
         {
             _sessions.Remove(connection.DeviceKey, out replaced);
-            session.PlayerNumber = NextPlayerNumber(_sessions.Values);
+            session.PlayerNumber = _playerSlots.Assign(connection.DeviceKey);
+            _settings.PlayerSlots = _playerSlots.Save();
             _sessions[connection.DeviceKey] = session;
         }
 
@@ -820,7 +862,9 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
             }
         }
 
-        connection.SetLedMask((byte)(WiimoteProtocol.Led1 << (session.PlayerNumber - 1)));
+        Pointer.Connected(connection.DeviceKey, connection);
+        connection.SetLedMask(PlayerSlotAssignments.LedMask(session.PlayerNumber));
+        SaveSettings();
         connection.SetRumble(_rumbleEnabled);
         if (_emulationEnabled)
         {
@@ -838,10 +882,12 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
             if (!_sessions.TryGetValue(connection.DeviceKey, out session) ||
                 !ReferenceEquals(session.Connection, connection)) return;
             _sessions.Remove(connection.DeviceKey);
+            _playerSlots.Release(connection.DeviceKey);
         }
 
         if (session is not null)
         {
+            Pointer.Disconnected(connection.DeviceKey, connection);
             connection.SnapshotUpdated -= OnSnapshotUpdated;
             lock (session.Gate)
             {
@@ -874,6 +920,7 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
             return;
         }
 
+        Pointer.Update(connection.DeviceKey, connection, state);
         lock (session.Gate)
         {
             if (session.Retired) return;
@@ -965,7 +1012,7 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
             if (session.Retired || !_emulationEnabled || session.Gamepad is null || session.Profile is null) return;
             try
             {
-                session.Gamepad.Submit(ProfileMapper.Map(session.Profile, state));
+                session.Gamepad.Submit(Pointer.OwnsInput(session.Connection.DeviceKey) ? XboxGamepadState.Neutral : ProfileMapper.Map(session.Profile, state));
             }
             catch (Exception ex)
             {
@@ -987,6 +1034,7 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
 
     private static AppSettings CopySettings(AppSettings settings) => new()
     {
+        Pointer = settings.Pointer,
         AutoConnect = settings.AutoConnect,
         AutoEnableEmulation = settings.AutoEnableEmulation,
         PollIntervalMs = settings.PollIntervalMs,
@@ -998,6 +1046,7 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
         DeviceProfiles = settings.DeviceProfiles != null
             ? new Dictionary<string, string>(settings.DeviceProfiles, StringComparer.OrdinalIgnoreCase)
             : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+        PlayerSlots = new PlayerSlotAssignments(settings.PlayerSlots).Save(),
         AvatarTheme = settings.AvatarTheme,
         AvatarRainEnabled = settings.AvatarRainEnabled,
         SparklineEnabled = settings.SparklineEnabled,
@@ -1020,20 +1069,7 @@ public sealed class HeadlessWiimoteService : IAsyncDisposable
         public bool Retired { get; set; }
     }
 
-    /// <summary>The lowest unused player slot, so the second remote lights LED 2.</summary>
-    private static int NextPlayerNumber(IEnumerable<DeviceSession> sessions)
-    {
-        var used = sessions.Select(session => session.PlayerNumber).ToHashSet();
-        for (var player = 1; player <= 4; player++)
-        {
-            if (!used.Contains(player))
-            {
-                return player;
-            }
-        }
 
-        return 4;
-    }
 }
 
 public sealed record ServerLogEntry(DateTimeOffset Timestamp, string Message, string Level);
@@ -1063,7 +1099,8 @@ public sealed record ServerDevice(
     short GyroY,
     short GyroZ,
     string? PreferredProfile = null,
-    int LedMask = 0);
+    int LedMask = 0,
+    int PlayerNumber = 0);
 public sealed record ServerSnapshot(
     string Platform,
     string BluetoothHint,
@@ -1084,7 +1121,8 @@ public sealed record ServerSnapshot(
     IReadOnlyList<ServerMapping> Mappings,
     IReadOnlyList<ServerDevice> Devices,
     IReadOnlyList<ServerLogEntry> Logs,
-    ExtensionStickMapping ExtensionStick)
+    ExtensionStickMapping ExtensionStick,
+    PointerSnapshot? Pointer = null)
 {
     public ExperimentalFeatureStatus MotionPlus { get; } = new(
         ExperimentalMotionPlus.Status, ExperimentalMotionPlus.Available, ExperimentalMotionPlus.Description);
@@ -1172,3 +1210,5 @@ public sealed record SettingsRequest(
     bool RumbleOnButtonPress = false,
     bool BatterySegmentsEnabled = true,
     bool IrEnabled = false);
+
+public sealed record PointerRequest(string Action, string? DeviceKey = null, string? DisplayId = null);

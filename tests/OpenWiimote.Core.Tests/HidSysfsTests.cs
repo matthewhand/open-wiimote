@@ -10,7 +10,7 @@ public sealed class HidSysfsTests
         HID_ID=0005:0000057E:00000306
         HID_NAME=Nintendo RVL-CNT-01
         HID_PHYS=dc:56:7b:03:2b:ae
-        HID_UNIQ=02:00:00:00:00:01
+        HID_UNIQ=02:11:ab:33:cd:55
         MODALIAS=hid:b0005g0000v0000057Ep00000306
         """;
 
@@ -23,7 +23,7 @@ public sealed class HidSysfsTests
         Assert.Equal(0x057E, identity.VendorId);
         Assert.Equal(0x0306, identity.ProductId);
         Assert.Equal("Nintendo RVL-CNT-01", identity.Name);
-        Assert.Equal("02:00:00:00:00:01", identity.UniqueId);
+        Assert.Equal("02:11:ab:33:cd:55", identity.UniqueId);
         Assert.Equal("hid:b0005g0000v0000057Ep00000306", identity.Modalias);
     }
 

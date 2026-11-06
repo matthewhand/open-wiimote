@@ -39,3 +39,26 @@ test('default profile deletion is rejected without losing the fallback', async (
   expect(response.status()).toBe(400);
   expect(await (await request.get('/api/profiles', { headers: AUTH })).json()).toContain('Default');
 });
+
+
+test('Linux wake guidance follows auto-connect and does not promise Bluetooth reconnection on other platforms', async ({ page }) => {
+  let payload = stateWith([]);
+  await page.route('**/api/state', route => route.fulfill({ json: payload }));
+  await page.goto(`/?token=${TOKEN}`);
+  await expect(page.locator('#setupRemote')).toContainText('1 + 2');
+  await expect(page.locator('#autoConnectNote')).toContainText('paired, trusted');
+  payload = { ...payload, settings: { ...payload.settings, autoConnect: false } };
+  await expect(page.locator('#setupRemote')).toContainText('Enable Auto-connect');
+  payload = { ...payload, platform: 'Windows', settings: { ...payload.settings, autoConnect: true } };
+  await expect(page.locator('#autoConnectNote')).toContainText('connected by your operating system');
+  await expect(page.locator('#setupRemote')).not.toContainText('15 seconds');
+});
+
+test('remembered player number stays distinct from a temporary LED pattern and updates without reselection', async ({ page }) => {
+  let remote = { ...device('second', 'Second remote', ''), playerNumber: 2, ledMask: 16 };
+  await page.route('**/api/state', route => route.fulfill({ json: stateWith([remote]) }));
+  await page.goto(`/?token=${TOKEN}`);
+  await expect(page.locator('#deviceListCard .device-side')).toContainText('Player 2');
+  remote = { ...remote, playerNumber: 3 };
+  await expect(page.locator('#deviceListCard .device-side')).toContainText('Player 3');
+});

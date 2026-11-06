@@ -17,7 +17,7 @@ async function openWithDevices(page: Page, devices: unknown[]) {
 }
 
 const TWO_DEVICES = [
-  device('device-1', 'Living room', '02:00:00:00:00:01', 85),
+  device('device-1', 'Living room', '02:11:AB:33:CD:55', 85),
   device('device-2', 'Kitchen', '00:1E:35:11:22:33', 42)
 ];
 
@@ -43,7 +43,7 @@ test.describe('device search/filter', () => {
     await openWithDevices(page, TWO_DEVICES);
 
     const search = page.locator('#deviceSearch');
-    await search.fill('00:01');
+    await search.fill('CD:55');
     await expect(page.locator('#deviceList .device')).toHaveCount(1);
     await expect(page.locator('#deviceList .device')).toContainText('Living room');
 

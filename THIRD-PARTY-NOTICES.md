@@ -79,3 +79,11 @@ distribution rather than an assumed upstream tag.
 versions/hashes or dependency bytes, missing or altered notice texts, unreviewed SDKs, and changed npm
 dependencies. Review upstream terms and update the manifest and full texts together
 when changing dependencies. Links and SPDX labels alone are not the notice bundle.
+
+## Windows candidate runtime distribution
+
+Windows private packages bundle Microsoft .NET 10.0.14 in a separate runtime directory,
+verified against the official SHA-512 hashes pinned in `third_party/dotnet-windows-runtime.json`.
+Retain [its license](third_party/licenses/DOTNET-WINDOWS-LICENSE.txt) and
+[third-party notices](third_party/licenses/DOTNET-WINDOWS-ThirdPartyNotices.txt).
+The source checkout contains these notices and hashes; runtime archives stay outside it.

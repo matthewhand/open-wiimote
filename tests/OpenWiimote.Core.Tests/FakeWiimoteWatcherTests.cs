@@ -12,7 +12,7 @@ namespace OpenWiimote.Core.Tests;
 /// </summary>
 public sealed class FakeWiimoteWatcherTests
 {
-    private const string DeviceKey = "02:00:00:00:00:01";
+    private const string DeviceKey = "02:11:AB:33:CD:55";
 
     [Fact]
     public async Task TheWatcherConnectsToARemoteAndDecodesTheReportsItSends()

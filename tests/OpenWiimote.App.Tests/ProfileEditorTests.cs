@@ -209,6 +209,8 @@ public sealed class ProfileEditorTests
 
     private static ComboBox FindMappingCombo(MainWindow window, string name, string target)
     {
+        window.FindControl<TabControl>("ControllerTabs")!.SelectedIndex = 1;
+        Dispatcher.UIThread.RunJobs();
         var combo = window.GetVisualDescendants()
             .OfType<ComboBox>()
             .FirstOrDefault(candidate => candidate.Name == name && (string?)candidate.Tag == target);

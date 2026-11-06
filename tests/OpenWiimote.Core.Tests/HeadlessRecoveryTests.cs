@@ -125,6 +125,45 @@ public sealed class HeadlessRecoveryTests
     }
 
     [Fact]
+    public async Task SavedPlayerSlotsSurviveAServiceRestartInReverseOrder()
+    {
+        AppSettings saved;
+        await using (var original = new Fixture())
+        {
+            using var first = original.Connect("first");
+            using var second = original.Connect("second");
+            saved = original.Settings.Load();
+        }
+        await using var restarted = new Fixture(saved);
+        using var secondAgain = restarted.Connect("second");
+        using var firstAgain = restarted.Connect("first");
+        Assert.Equal(32, secondAgain.LedMask);
+        Assert.Equal(16, firstAgain.LedMask);
+    }
+
+    [Fact]
+    public async Task ReconnectsAndDuplicateEventsKeepPlayerSlotsAndIgnoreOldDisconnects()
+    {
+        await using var fixture = new Fixture();
+        using var first = fixture.Connect("first");
+        using var second = fixture.Connect("second");
+        fixture.Service.OnDeviceDisconnected(null, first);
+        fixture.Service.OnDeviceDisconnected(null, second);
+        using var secondAgain = fixture.Connect("second");
+        using var firstAgain = fixture.Connect("first");
+        fixture.Service.OnDeviceDisconnected(null, second);
+        using var replacement = fixture.Connect("second");
+        fixture.Service.OnDeviceDisconnected(null, secondAgain);
+        var devices = fixture.Service.GetSnapshot().Devices;
+        Assert.Equal(2, devices.Count);
+        Assert.Equal(16, devices.Single(device => device.Key == "first").LedMask);
+        Assert.Equal(32, devices.Single(device => device.Key == "second").LedMask);
+        Assert.Equal(2, devices.Single(device => device.Key == "second").PlayerNumber);
+        Assert.Equal(2, fixture.Service.GetSnapshot().Settings.PlayerSlots["second"]);
+        Assert.Equal(2, fixture.Settings.Load().PlayerSlots["second"]);
+    }
+
+    [Fact]
     public async Task RenamingAndDeletingProfilesUpdatesPinsAndCurrentOutput()
     {
         await using var fixture = new Fixture();
@@ -143,17 +182,44 @@ public sealed class HeadlessRecoveryTests
         Assert.Throws<ArgumentException>(() => fixture.Service.DeleteProfile("Default"));
     }
 
+    [Fact]
+    public async Task PointerCalibrationNeutralizesOnlyItsRemoteAndConsumesHeldButtonsUntilRelease()
+    {
+        await using var fixture = new Fixture(pointerBackend: new PointerBackend());
+        using var first = fixture.Connect(); using var second = fixture.Connect("second");
+        fixture.Service.SetEmulation(true);
+        var pressed = new WiimoteState { Buttons = WiimoteButton.Two };
+        fixture.Service.OnSnapshotUpdated(first, pressed); fixture.Service.OnSnapshotUpdated(second, pressed);
+        Assert.All(fixture.Provider.Pads, pad => Assert.True(pad.States.Last().Buttons.HasFlag(XboxGamepadButtons.A)));
+        fixture.Service.Pointer.Select("remote", "display"); fixture.Service.Pointer.BeginCalibration();
+        Assert.Equal(XboxGamepadState.Neutral, fixture.Provider.Pads[0].States.Last());
+        fixture.Service.OnSnapshotUpdated(first, pressed); fixture.Service.OnSnapshotUpdated(second, pressed);
+        Assert.Equal(XboxGamepadState.Neutral, fixture.Provider.Pads[0].States.Last());
+        Assert.True(fixture.Provider.Pads[1].States.Last().Buttons.HasFlag(XboxGamepadButtons.A));
+        fixture.Service.Pointer.CancelCalibration(); fixture.Service.OnSnapshotUpdated(first, pressed);
+        Assert.Equal(XboxGamepadState.Neutral, fixture.Provider.Pads[0].States.Last());
+        fixture.Service.OnSnapshotUpdated(first, new()); fixture.Service.OnSnapshotUpdated(first, pressed);
+        Assert.True(fixture.Provider.Pads[0].States.Last().Buttons.HasFlag(XboxGamepadButtons.A));
+    }
+    private sealed class PointerBackend : OpenWiimote.Core.Pointer.IPointerBackend
+    {
+        public IReadOnlyList<OpenWiimote.Core.Pointer.PointerDisplay> GetDisplays() => [new("display", "Ultrawide", 0, 0, 5120, 1440)];
+        public OpenWiimote.Core.Pointer.IPointerOutput Create(OpenWiimote.Core.Pointer.PointerDisplay display) => throw new NotSupportedException();
+    }
+
     private sealed class Fixture : IAsyncDisposable
     {
         private readonly string _root = Path.Combine(Path.GetTempPath(), "openwiimote-recovery-" + Guid.NewGuid().ToString("N"));
+        public SettingsStore Settings { get; }
         public ProfileStore Profiles { get; }
         public Provider Provider { get; } = new();
         public HeadlessWiimoteService Service { get; }
-        public Fixture()
+        public Fixture(AppSettings? saved = null, OpenWiimote.Core.Pointer.IPointerBackend? pointerBackend = null)
         {
-            var settings = new SettingsStore(_root);
+            var settings = Settings = new SettingsStore(_root);
+            if (saved is not null) settings.Save(saved);
             Profiles = new ProfileStore(settings.ProfilesDirectory);
-            Service = new HeadlessWiimoteService(new WiimoteWatcher(() => []), Provider, settings, Profiles);
+            Service = new HeadlessWiimoteService(new WiimoteWatcher(() => []), Provider, settings, Profiles, pointerBackend);
         }
         public WiimoteConnection Connect(string key = "remote")
         {

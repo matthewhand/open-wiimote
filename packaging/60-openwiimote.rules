@@ -15,8 +15,14 @@ SUBSYSTEM=="hidraw", DRIVERS=="wiimote", MODE="0660", GROUP="plugdev", TAG+="uac
 SUBSYSTEM=="hidraw", KERNELS=="0005:057E:*", MODE="0660", GROUP="plugdev", TAG+="uaccess"
 SUBSYSTEM=="hidraw", KERNELS=="0003:057E:*", MODE="0660", GROUP="plugdev", TAG+="uaccess"
 
-# Player LEDs published by the kernel driver, so the app can switch them.
-SUBSYSTEM=="leds", KERNEL=="0005:057E:*:blue:p?", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+# LED brightness is a sysfs attribute, not a /dev node: MODE/GROUP/uaccess do
+# not grant access to it. Grant plugdev write access only to Nintendo player LEDs.
+# No shell is invoked; %p is the matching kernel LED device's sysfs path.
+ACTION!="remove", SUBSYSTEM=="leds", KERNEL=="0005:057E:*:blue:p[0-3]", RUN+="/bin/chgrp plugdev /sys%p/brightness", RUN+="/bin/chmod g+w /sys%p/brightness"
+ACTION!="remove", SUBSYSTEM=="leds", KERNEL=="0003:057E:*:blue:p[0-3]", RUN+="/bin/chgrp plugdev /sys%p/brightness", RUN+="/bin/chmod g+w /sys%p/brightness"
 
 # Virtual gamepad. plugdev can read the remote; this node is what publishes the controller.
 KERNEL=="uinput", SUBSYSTEM=="misc", MODE="0660", GROUP="input", TAG+="uaccess"
+
+# Open only Wii Remote input nodes (including IR) to activate kernel reporting.
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Nintendo Wii Remote*", GROUP="plugdev", MODE="0660", TAG+="uaccess"

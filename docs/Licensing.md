@@ -1,7 +1,6 @@
 # License and notice audit
 
-OpenWiimote-owned code is ISC, using the existing license text supplied in the protected
-checkout. That checkout was read, not modified. Copyright remains 2026 Matthew Hand.
+OpenWiimote-owned code is ISC. Copyright remains 2026 Matthew Hand.
 `package.json` already declared ISC; .NET package metadata now declares ISC too.
 
 ## Scope and evidence
@@ -27,8 +26,9 @@ and source/package provenance; their contents have not been abridged or relabell
   revisions. The ViGEm client is distinct from the separately installed driver.
 - The generated .NET app host is bundled. The reviewed Ubuntu SDK 10.0.114/runtime
   distribution 10.0.14 supplies the included .NET license and third-party notices. These
-  are vendor-supplied files, not an inferred upstream tag. The shared .NET runtime and
-  system drivers/libraries are not bundled in the framework-dependent archive.
+  are vendor-supplied files, not an inferred upstream tag. The Linux archive requires a system .NET runtime. Windows packages include a pinned
+  official runtime with its original Windows runtime license and third-party notices;
+  do not assume all runtime components use the application license. System drivers are not bundled.
 - Playwright's Apache-2.0 LICENSE and NOTICE accompany the development dependency inventory.
   Node modules, downloaded browsers and .NET test-package binaries are not redistributed
   in the runtime archive; their installed packages retain their own license files.

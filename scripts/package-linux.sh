@@ -7,7 +7,7 @@ export DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE=1
 
 usage() {
   echo 'Usage: scripts/package-linux.sh VERSION OUTPUT_DIRECTORY' >&2
-  echo 'Example: scripts/package-linux.sh 0.1.0-rc.2 /path/to/release-artifacts' >&2
+  echo 'Example: scripts/package-linux.sh 0.1.0-rc.1 /path/to/private-artifacts' >&2
 }
 [[ $# == 2 ]] || { usage; exit 2; }
 version=$1
@@ -38,7 +38,7 @@ if bad:
     print('Untracked source/content inputs must be committed or removed before packaging.',file=sys.stderr)
     sys.exit(2)
 PY
-for input in LICENSE THIRD-PARTY-NOTICES.md third_party/manifest.json scripts/bundle-notices.py scripts/package-linux.sh scripts/check-linux-setup.sh tools/openwiimote-helper.sh docs/Linux-Release.md docs/Release-Notes.md docs/Linux-Setup.md docs/Licensing.md packaging/60-openwiimote.rules packaging/openwiimote.service.example; do
+for input in LICENSE THIRD-PARTY-NOTICES.md third_party/manifest.json scripts/bundle-notices.py scripts/package-linux.sh scripts/check-linux-setup.sh tools/openwiimote-helper.sh docs/Linux-Release.md docs/Release-Notes.md docs/Avatar-Calibration.md docs/Linux-Setup.md docs/Licensing.md packaging/60-openwiimote.rules packaging/openwiimote.service.example; do
   git ls-files --error-unmatch -- "$input" >/dev/null 2>&1 || {
     echo "Commit packaging input before building: $input" >&2; exit 2;
   }
@@ -77,10 +77,10 @@ python3 scripts/bundle-notices.py --deps "$payload/OpenWiimote.deps.json" \
 # Debug symbols can contain developer paths and are not part of the candidate.
 find "$payload" -type f -name '*.pdb' -delete
 mkdir -p "$payload/docs" "$payload/packaging"
-cp docs/Linux-Release.md docs/Linux-Setup.md docs/Licensing.md "$payload/docs/"
+cp docs/Linux-Release.md docs/Linux-Setup.md docs/Licensing.md docs/Avatar-Calibration.md docs/Pointer-Setup.md "$payload/docs/"
 cp docs/Release-Notes.md "$payload/RELEASE-NOTES.md"
 cat > "$payload/README.md" <<'PACKAGE_README'
-# OpenWiimote Linux release candidate
+# OpenWiimote Linux prerelease
 
 The version and source commit are in `release.json`. This framework-dependent package
 requires .NET 10. Verify the extracted files with `sha256sum -c SHA256SUMS`, then run:
@@ -135,6 +135,6 @@ tar -C "$stage" --sort=name --mtime="@$epoch" --owner=0 --group=0 --numeric-owne
 # Hard links create the output atomically without overwriting an existing release.
 ln -- "$stage/artifact.tar.gz" "$archive"
 ln -- "$stage/artifact.sha256" "$archive.sha256"
-printf 'Release candidate: %s\n' "$archive"
+printf 'Private release candidate: %s\n' "$archive"
 printf 'Verify with: (cd %q && sha256sum -c %q)\n' "$output_dir" "$name.tar.gz.sha256"
-printf 'Hardware acceptance remains partial; see release notes.\n'
+printf 'Hardware acceptance and public distribution review remain required.\n'

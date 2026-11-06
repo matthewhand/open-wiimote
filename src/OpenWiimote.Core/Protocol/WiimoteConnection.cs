@@ -16,6 +16,7 @@ public sealed class WiimoteConnection : IDisposable
     private readonly object _stateGate = new();
     private readonly KernelHidAccelerometer? _accelerometer;
     private readonly KernelHidLeds? _leds;
+    private KernelHidIr? _kernelIr;
     private CancellationTokenSource? _cts;
     private Task? _runTask;
     private WiimoteState _state = new();
@@ -56,6 +57,7 @@ public sealed class WiimoteConnection : IDisposable
 
         _accelerometer = KernelDriver is null ? null : KernelHidAccelerometer.TryOpen(device);
         _leds = KernelDriver is null ? null : KernelHidLeds.TryCreate(device.DevicePath);
+        if (KernelDriver is not null && _irEnabled) _kernelIr = KernelHidIr.TryOpen(device);
     }
 
     public string DeviceKey { get; }
@@ -404,7 +406,7 @@ public sealed class WiimoteConnection : IDisposable
 
             if (report.IrPoints != null)
             {
-                next = next with { IrPoints = report.IrPoints };
+                next = next with { IrPoints = report.IrPoints, LastIrReport = DateTimeOffset.UtcNow, IrFrameNumber = next.IrFrameNumber + 1 };
             }
 
             if (extensionRemoved)
@@ -699,9 +701,18 @@ public sealed class WiimoteConnection : IDisposable
     /// </summary>
     public bool SetIrEnabled(bool enabled)
     {
-        if (IsKernelOwned || !IsAlive)
+        if (!IsAlive) return false;
+        if (IsKernelOwned)
         {
-            return false;
+            lock (_stateGate)
+            {
+                if (_disposed) return false;
+                if (enabled) _kernelIr ??= KernelHidIr.TryOpen(_device);
+                else { _kernelIr?.Dispose(); _kernelIr = null; }
+                _irEnabled = enabled;
+                if (!enabled) _state = _state with { IrPoints = [], LastIrReport = null };
+                return !enabled || _kernelIr is not null;
+            }
         }
 
         if (_irEnabled == enabled)
@@ -911,6 +922,7 @@ public sealed class WiimoteConnection : IDisposable
         {
         }
 
+        lock (_stateGate) { _kernelIr?.Dispose(); _kernelIr = null; }
         _accelerometer?.Dispose();
         _cts?.Dispose();
     }

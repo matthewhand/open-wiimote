@@ -36,11 +36,15 @@ test('avatar levelling does not change live sensor tilt or send profile edits', 
     accelX: 0.5, accelY: 0, accelZ: 1, tiltXDegrees: 27, tiltYDegrees: 0
   })]);
   const mutations: string[] = [];
-  await page.route('**/api/state', route => route.fulfill({ json: payload }));
+  await page.route('**/api/state', route => {
+    payload.devices[0].state.lastReport = new Date().toISOString();
+    return route.fulfill({ json: payload });
+  });
   page.on('request', request => { if (request.method() === 'POST' && request.url().endsWith('/api/tilt')) mutations.push(request.url()); });
   await page.goto(`/?token=${TOKEN}`);
   await expect(page.locator('#detailTilt')).toHaveText('27° / 0°');
   await page.locator('#viewOptions summary').click();
+  for (let i = 0; i < 6; i++) await page.waitForResponse(r => r.url().endsWith('/api/state'));
   await page.locator('#tiltCalibration').check();
   await expect(page.locator('#tiltCalibrationNote')).toContainText('virtual-controller output is unchanged');
   await expect(page.locator('#detailTilt')).toHaveText('27° / 0°');

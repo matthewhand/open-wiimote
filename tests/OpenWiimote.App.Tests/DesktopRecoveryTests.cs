@@ -76,6 +76,25 @@ public sealed class DesktopRecoveryTests
         Assert.True(newPad.States.Last().Buttons.HasFlag(XboxGamepadButtons.A));
     }
 
+    [AvaloniaFact]
+    public void PlayerLightsSurviveReverseReconnectAndDuplicateConnections()
+    {
+        using var fixture = new Fixture();
+        using var first = fixture.Connect("first");
+        using var second = fixture.Connect("second");
+        Assert.Equal(16, first.LedMask);
+        Assert.Equal(32, second.LedMask);
+        fixture.Window.HandleDeviceDisconnected(first);
+        fixture.Window.HandleDeviceDisconnected(second);
+        using var secondAgain = fixture.Connect("second");
+        using var firstAgain = fixture.Connect("first");
+        using var replacement = fixture.Connect("second");
+        fixture.Window.HandleDeviceDisconnected(secondAgain);
+        Assert.Equal(2, fixture.Window.Devices.Count);
+        Assert.Equal(16, firstAgain.LedMask);
+        Assert.Equal(32, replacement.LedMask);
+    }
+
     private sealed class Fixture : IDisposable
     {
         private readonly string _root = Path.Combine(Path.GetTempPath(), "openwiimote-desktop-" + Guid.NewGuid().ToString("N"));
@@ -88,9 +107,9 @@ public sealed class DesktopRecoveryTests
             Window.Show();
             Dispatcher.UIThread.RunJobs();
         }
-        public WiimoteConnection Connect()
+        public WiimoteConnection Connect(string key = "remote")
         {
-            var connection = WiimoteConnection.Open(new FakeWiimoteDevice(), new WiimoteWatcherOptions(), "remote");
+            var connection = WiimoteConnection.Open(new FakeWiimoteDevice(), new WiimoteWatcherOptions(), key);
             Window.HandleDeviceConnected(connection);
             return connection;
         }

@@ -19,7 +19,7 @@ public sealed class DeviceViewModelTests
         var changed = new List<string?>();
         viewModel.PropertyChanged += (_, args) => changed.Add(args.PropertyName);
 
-        Assert.Equal("02:00:00:00:00:01", viewModel.BluetoothAddress);
+        Assert.Equal("02:11:AB:33:CD:55", viewModel.BluetoothAddress);
         Assert.Null(viewModel.PinnedProfile);
         Assert.Equal("Follows the active profile", viewModel.ProfileText);
 

@@ -13,7 +13,7 @@ public sealed class KernelHidLeds
 {
     private readonly string?[] _brightnessPaths;
 
-    private KernelHidLeds(string?[] brightnessPaths)
+    internal KernelHidLeds(string?[] brightnessPaths)
     {
         _brightnessPaths = brightnessPaths;
     }
@@ -125,9 +125,11 @@ public sealed class KernelHidLeds
 
             try
             {
-                // The kernel driver publishes these as full range LEDs, so use the maximum
-                // brightness rather than a dim value.
-                File.WriteAllText(path, on ? "255" : "0");
+                // hid-wiimote player LEDs normally have max_brightness=1. Do not
+                // write 255 to a binary LED or assume every LED uses the same range.
+                var maximumPath = Path.Combine(Path.GetDirectoryName(path)!, "max_brightness");
+                var maximum = int.TryParse(File.ReadAllText(maximumPath).Trim(), out var value) && value > 0 ? value : 1;
+                File.WriteAllText(path, on ? maximum.ToString(System.Globalization.CultureInfo.InvariantCulture) : "0");
             }
             catch (IOException)
             {

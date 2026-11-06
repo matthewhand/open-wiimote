@@ -100,6 +100,24 @@ class NoticeBundleTests(unittest.TestCase):
         with self.assertRaisesRegex(notices.NoticeError, 'Project LICENSE differs'):
             self.bundle()
 
+    def test_windows_native_asset_is_checked_at_its_rid_publish_location(self):
+        output = self.root / 'output'; output.mkdir()
+        native = output / 'native.dll'; native.write_bytes(b'reviewed Windows binary')
+        self.manifest['packages']['Dependency/1.0']['files'] = {
+            'runtimes/win-arm64/native/native.dll': self.hash(native),
+            'runtimes/win-x64/native/native.dll': 'other-architecture-hash'
+        }
+        self.deps['runtimeTarget'] = {'name': '.NETCoreApp,Version=v10.0/win-arm64'}; self.save()
+        self.assertEqual(1, notices.bundle(self.root, self.root/'deps.json', output, '10.0.test', 'win-arm64'))
+        native.write_bytes(b'tampered')
+        with self.assertRaisesRegex(notices.NoticeError, 'Published dependency file differs'):
+            notices.bundle(self.root, self.root/'deps.json', output, '10.0.test', 'win-arm64')
+
+    def test_wrong_rid_cannot_skip_all_native_asset_checks(self):
+        self.deps['runtimeTarget'] = {'name': '.NETCoreApp,Version=v10.0/win-arm64'}; self.save()
+        with self.assertRaisesRegex(notices.NoticeError, 'Runtime identifier'):
+            notices.bundle(self.root, self.root/'deps.json', self.root/'output', '10.0.test', 'win-x64')
+
 
 if __name__ == '__main__':
     unittest.main()

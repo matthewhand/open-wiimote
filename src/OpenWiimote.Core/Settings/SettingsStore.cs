@@ -40,7 +40,7 @@ public sealed class SettingsStore
 
         try
         {
-            return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath), _jsonOptions)
+            return JsonSerializer.Deserialize<AppSettings>(AtomicTextFile.Read(SettingsPath), _jsonOptions)
                    ?? new AppSettings();
         }
         catch
@@ -51,16 +51,6 @@ public sealed class SettingsStore
 
     public void Save(AppSettings settings)
     {
-        var temp = SettingsPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
-        var json = JsonSerializer.Serialize(settings, _jsonOptions);
-        try
-        {
-            File.WriteAllText(temp, json);
-            File.Move(temp, SettingsPath, overwrite: true);
-        }
-        finally
-        {
-            if (File.Exists(temp)) File.Delete(temp);
-        }
+        AtomicTextFile.Write(SettingsPath, JsonSerializer.Serialize(settings, _jsonOptions));
     }
 }

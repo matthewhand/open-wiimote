@@ -38,7 +38,7 @@ BUTTONS = {
     0x13C: "Home",
 }
 WEB_ROOT = Path(__file__).resolve().parents[1] / "src" / "OpenWiimote.App" / "wwwroot"
-ADDRESS = "02:00:00:00:00:01"
+ADDRESS = "02:11:AB:33:CD:55"
 
 
 class Remote:
@@ -198,7 +198,7 @@ def main() -> None:
     threading.Thread(target=read_device, args=("Nintendo Wii Remote", remote, "keys", stop), daemon=True).start()
     Handler.remote = remote
     server = ThreadingHTTPServer((HOST, PORT), Handler)
-    print(f"OpenWiimote view on http://localhost:{PORT}/", flush=True)
+    print(f"OpenWiimote view on http://127.0.0.1:{PORT}/", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

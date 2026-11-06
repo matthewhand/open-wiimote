@@ -10,6 +10,9 @@ namespace OpenWiimote.Platform.Linux;
 /// </remarks>
 internal static class LinuxInput
 {
+    public const ushort InputPropDirect = 0x01;
+    public const ushort BtnLeft = 0x110;
+    public const ushort BtnRight = 0x111;
     public const ushort EvSyn = 0x00;
     public const ushort EvKey = 0x01;
     public const ushort EvAbs = 0x03;

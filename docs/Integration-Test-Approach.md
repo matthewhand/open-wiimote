@@ -51,7 +51,7 @@ unless the service was started with `OPENWIIMOTE_ALLOW_ANONYMOUS=1`.
 | `/api/emulation` | POST | `{ "enabled": true }` | Starts or stops the virtual controller |
 | `/api/rumble` | POST | `{ "enabled": true }` | Toggles rumble |
 | `/api/mapping` | POST | `{ "target": "A", "button": "Home" }` | Saves one Wiimote button on the active profile; a missing target answers 400 |
-| `/api/leds` | POST | `{ "value": 32, "deviceKey": "02:00:00:00:00:02" }` | Sets that remote's player LEDs. Without `deviceKey`, the same mask is written to every connected remote |
+| `/api/leds` | POST | `{ "value": 32, "deviceKey": "02:11:AB:33:CD:66" }` | Sets that remote's player LEDs. Without `deviceKey`, the same mask is written to every connected remote |
 | `/api/scan`, `/api/disconnect`, `/api/logs/clear` | POST | — | Scan, disconnect every remote, clear the log |
 | `/api/paireddevices` (also `/api/bluetooth/paired` and `/api/bluetooth/paireddevices`) | GET | — | The Bluetooth devices the operating system has already paired, which is what the pairing panel lists |
 | `/api/bluetooth/scan` (also `/api/scan/bluetooth`) | GET or POST | — | Discover pairable Bluetooth devices |

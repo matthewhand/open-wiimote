@@ -27,6 +27,11 @@ public sealed class ViGEmGamepadProvider : IVirtualGamepadProvider
                 return false;
             }
 
+            if (System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64)
+            {
+                error = "For virtual Xbox gamepads only: on Windows 11 ARM, use the x64 OpenWiimote build with the ARM64 ViGEmBus driver. Native ARM64 pointer mode works without that driver.";
+                return false;
+            }
             try
             {
                 _client ??= new ViGEmClient();
@@ -34,7 +39,9 @@ public sealed class ViGEmGamepadProvider : IVirtualGamepadProvider
             }
             catch (Exception ex)
             {
-                error = ex.Message;
+                error = ex is Nefarius.ViGEm.Client.Exceptions.VigemBusNotFoundException
+                    ? "Install the official signed ViGEmBus driver, then re-enable emulation. Pointer mode works without it."
+                    : "Windows virtual controller is unavailable: " + ex.Message;
                 return false;
             }
         }
@@ -53,6 +60,11 @@ public sealed class ViGEmGamepadProvider : IVirtualGamepadProvider
                 return false;
             }
 
+            if (System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64)
+            {
+                error = "For virtual Xbox gamepads only: on Windows 11 ARM, use the x64 OpenWiimote build with the ARM64 ViGEmBus driver. Native ARM64 pointer mode works without that driver.";
+                return false;
+            }
             try
             {
                 _client ??= new ViGEmClient();
@@ -61,7 +73,9 @@ public sealed class ViGEmGamepadProvider : IVirtualGamepadProvider
             }
             catch (Exception ex)
             {
-                error = ex.Message;
+                error = ex is Nefarius.ViGEm.Client.Exceptions.VigemBusNotFoundException
+                    ? "Install the official signed ViGEmBus driver, then re-enable emulation. Pointer mode works without it."
+                    : "Windows virtual controller is unavailable: " + ex.Message;
                 return false;
             }
         }

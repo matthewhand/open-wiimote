@@ -1,3 +1,4 @@
+using OpenWiimote.Core.Pointer;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -31,6 +32,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private readonly System.Collections.Concurrent.ConcurrentQueue<string> _logWriter = new();
     private System.Threading.Timer? _logTimer;
     private readonly WiimoteWatcher _watcher;
+    private readonly PlayerSlotAssignments _playerSlots;
+    private readonly PointerController _pointer;
+    private Window? _pointerWindow;
+    private readonly DispatcherTimer _mouseModeTimer = new() { Interval = TimeSpan.FromMilliseconds(100) };
+    private string? _mouseModeError;
     private readonly IVirtualGamepadProvider _gamepadProvider;
     private readonly object _sessionsGate = new();
     private readonly Dictionary<string, DeviceSession> _sessions = new(StringComparer.OrdinalIgnoreCase);
@@ -57,12 +63,26 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         SettingsStore settingsStore, ProfileStore profileStore)
     {
         InitializeComponent();
+        WindowsPairButton.IsVisible = OperatingSystem.IsWindows();
 
         _watcher = watcher;
         _gamepadProvider = provider;
         _settingsStore = settingsStore;
         _profileStore = profileStore;
         _settings = _settingsStore.Load();
+        _pointer = new(PlatformBackend.CreatePointerBackend(), _settings.Pointer, next =>
+        {
+            var previous = _settings.Pointer; _settings.Pointer = next;
+            try { _settingsStore.Save(_settings); } catch { _settings.Pointer = previous; throw; }
+        });
+        _pointer.InputClaimed += key =>
+        {
+            foreach (var session in GetSessions().Where(s => s.Connection.DeviceKey == key))
+                lock (session.Gate) { try { session.Gamepad?.Submit(XboxGamepadState.Neutral); } catch { } }
+        };
+        _mouseModeTimer.Tick += (_, _) => RefreshMouseMode();
+        Opened += (_, _) => { RefreshMouseMode(); _mouseModeTimer.Start(); };
+        _playerSlots = new PlayerSlotAssignments(_settings.PlayerSlots);
         _logFilePath = Path.Combine(
             _settingsStore.LogsDirectory,
             $"session_{DateTime.Now:yyyyMMdd_HHmmss}.log");
@@ -125,6 +145,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             EmptyDetails.IsVisible = !visible;
             DetailsPanel.IsVisible = visible;
             Avatar.SetState(value?.State ?? new WiimoteState());
+            IrSensor.SetState(value?.State ?? new WiimoteState());
             ExtensionAvatarControl.SetState(value?.State ?? new WiimoteState());
             Avatar.SetLedMask((byte)_settings.LedMask);
             Avatar.SetBatteryPercent(value?.State.BatteryPercent ?? -1);
@@ -211,6 +232,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
 
         _closing = true;
+        _pointerWindow?.Close();
+        _pairWindow?.Close();
+        _mouseModeTimer.Stop();
+        _pointer.Dispose();
         _logTimer?.Dispose();
         _logTimer = null;
         DrainLogWriter();
@@ -329,8 +354,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         lock (_sessionsGate)
         {
             _sessions[connection.DeviceKey] = session;
+            session.PlayerNumber = _playerSlots.Assign(connection.DeviceKey);
+            connection.SetLedMask(PlayerSlotAssignments.LedMask(session.PlayerNumber));
+            _settings.PlayerSlots = _playerSlots.Save();
+            _settingsStore.Save(_settings);
         }
 
+        _pointer.Connected(connection.DeviceKey, connection);
         viewModel.Apply(connection.Snapshot);
         Devices.Insert(0, viewModel);
         SelectedDevice ??= viewModel;
@@ -354,7 +384,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         UpdateHeaderStatus();
         UpdateEmulationStatus();
-        Avatar.SetLedMask((byte)_settings.LedMask);
+        if (SelectedDevice is not null) UpdateAvatar(SelectedDevice);
     }
 
     internal void HandleDeviceDisconnected(WiimoteConnection connection)
@@ -365,6 +395,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             if (!_sessions.TryGetValue(connection.DeviceKey, out session) ||
                 !ReferenceEquals(session.Connection, connection)) return;
             _sessions.Remove(connection.DeviceKey);
+            _playerSlots.Release(connection.DeviceKey);
         }
 
         if (session is null)
@@ -372,6 +403,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         }
 
+        _pointer.Disconnected(connection.DeviceKey, connection);
         if (session.SnapshotHandler is not null)
         {
             connection.SnapshotUpdated -= session.SnapshotHandler;
@@ -407,6 +439,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             if (!_sessions.TryGetValue(connection.DeviceKey, out session) ||
                 !ReferenceEquals(session.Connection, connection)) return;
         }
+        _pointer.Update(connection.DeviceKey, connection, state);
         OnSnapshot(session, state);
     }
 
@@ -481,8 +514,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void UpdateAvatar(DeviceViewModel viewModel)
     {
         Avatar.SetState(viewModel.State);
+        IrSensor.SetState(viewModel.State);
         ExtensionAvatarControl.SetState(viewModel.State);
-        Avatar.SetLedMask((byte)_settings.LedMask);
+        lock (_sessionsGate)
+            Avatar.SetLedMask(_sessions.GetValueOrDefault(viewModel.DeviceKey)?.Connection.LedMask ?? (byte)_settings.LedMask);
         Avatar.SetBatteryPercent(viewModel.State.BatteryPercent);
     }
 
@@ -604,7 +639,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         lock (session.Gate)
         {
             if (session.Retired || _closing || !_emulationEnabled || session.Gamepad is null || session.Profile is null) return;
-            try { session.Gamepad.Submit(ProfileMapper.Map(session.Profile, state)); }
+            try { session.Gamepad.Submit(_pointer.OwnsInput(session.Connection.DeviceKey) ? XboxGamepadState.Neutral : ProfileMapper.Map(session.Profile, state)); }
             catch (Exception ex)
             {
                 var failed = session.Gamepad;
@@ -1481,6 +1516,62 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         Led4Button.IsChecked = (_settings.LedMask & WiimoteProtocol.Led4) != 0;
     }
 
+    private Window? _pairWindow;
+    private void PairWindows_Click(object? sender, RoutedEventArgs e)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        if (_pairWindow?.IsVisible == true) { _pairWindow.Activate(); return; }
+        _pairWindow = new WindowsPairWindow(); _pairWindow.Show(this);
+    }
+
+    private void RefreshMouseMode()
+    {
+        var state = _pointer.Snapshot();
+        MouseModeToggle.IsChecked = state.Enabled;
+        MouseModeToggle.Content = state.Enabled ? "Mouse mode: On" : "Mouse mode: Off";
+        MouseModeHint.Text = state.Enabled ? "Mouse mode is on. A = left click, B = right click, Home = stop."
+            : _mouseModeError ?? state.Error ?? (state.Calibrating ? "Calibrating mouse mode. Hold steady and press A at each target."
+            : state.Calibrated ? "Mouse mode is off. Aim at the sensor bar, then switch Mouse mode on."
+            : "Mouse mode is off. Choose your remote and display in Sensor bar pointer setup, then calibrate.");
+    }
+    private void MouseMode_Click(object? sender, RoutedEventArgs e)
+    {
+        var enable = MouseModeToggle.IsChecked == true;
+        try
+        {
+            _mouseModeError = null;
+            if (enable && _pointer.Snapshot().Calibrating)
+                PointerSetup_Click(sender, e);
+            else
+                _pointer.Enable(enable);
+        }
+        catch (Exception ex)
+        {
+            _mouseModeError = ex.Message;
+            if (enable) PointerSetup_Click(sender, e);
+        }
+        RefreshMouseMode();
+    }
+
+    private void PointerSetup_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_pointerWindow?.IsVisible == true) { _pointerWindow.Activate(); return; }
+        _pointerWindow = new PointerSetupWindow(_pointer,
+            () => GetSessions().Select(s => new PointerRemote(s.Connection.DeviceKey, $"Player {s.PlayerNumber} · {s.Connection.ProductName}")).ToArray(),
+            (key, display) =>
+            {
+                var previous = _pointer.Snapshot().DeviceKey;
+                _pointer.Select(key, display);
+                foreach (var session in GetSessions())
+                {
+                    if (session.Connection.DeviceKey == previous && key != previous && !_settings.IrEnabled) session.Connection.SetIrEnabled(false);
+                    if (session.Connection.DeviceKey == key && !session.Connection.SetIrEnabled(true))
+                        throw new ArgumentException("The IR camera could not be opened. Check the remote connection and permissions.");
+                }
+            });
+        _pointerWindow.Show(this);
+    }
+
     private void LedButton_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is not ToggleButton { Tag: string raw } || !byte.TryParse(raw, out var bit))
@@ -1659,6 +1750,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         public object Gate { get; } = new();
         public IVirtualGamepad? Gamepad { get; set; }
         public MappingProfile? Profile { get; set; }
+        public int PlayerNumber { get; set; }
         public EventHandler<WiimoteState>? SnapshotHandler { get; set; }
         public DateTimeOffset LastUiUpdate { get; set; }
         public int LastLoggedBattery { get; set; } = -1;

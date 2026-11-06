@@ -10,6 +10,50 @@ internal static class Program
     [STAThread]
     public static async Task Main(string[] args)
     {
+        if (args.Length == 2 && args[0] == "--windows-scan")
+        {
+            try { File.WriteAllText(args[1], System.Text.Json.JsonSerializer.Serialize(OpenWiimote.Platform.Windows.WindowsWiimotePairing.Scan())); }
+            catch (Exception ex) { File.WriteAllText(args[1], System.Text.Json.JsonSerializer.Serialize(new { error = ex.Message })); Environment.ExitCode = 2; }
+            return;
+        }
+        if (args.Length == 4 && args[0] == "--windows-pair")
+        {
+            try { File.WriteAllText(args[3], System.Text.Json.JsonSerializer.Serialize(OpenWiimote.Platform.Windows.WindowsWiimotePairing.Pair(args[1], args[2]))); }
+            catch (Exception ex) { File.WriteAllText(args[3], System.Text.Json.JsonSerializer.Serialize(new { error = ex.Message })); Environment.ExitCode = 2; }
+            return;
+        }
+
+        var diagnosticIndex = Array.FindIndex(args, arg => arg == "--diagnostics");
+        if (diagnosticIndex >= 0)
+        {
+            if (diagnosticIndex + 1 >= args.Length) { Environment.ExitCode = 2; return; }
+            using var provider = PlatformBackend.CreateGamepadProvider();
+            var gamepadAvailable = provider.Probe(out var gamepadError);
+            var backend = PlatformBackend.CreatePointerBackend();
+            var displays = backend.GetDisplays();
+            bool? pointerOutput = null; string? pointerError = null;
+            if (args.Contains("--check-pointer-output") && backend is OpenWiimote.Platform.Windows.WindowsPointerBackend windows)
+            {
+                try { pointerOutput = windows.CheckOutputAtCurrentCursor(); } catch (Exception ex) { pointerOutput = false; pointerError = ex.Message; }
+            }
+            bool? gamepadOutput = null; string? gamepadOutputError = null;
+            if (args.Contains("--check-gamepad-output") && OperatingSystem.IsWindows())
+                gamepadOutput = OpenWiimote.Platform.Windows.WindowsGamepadProbe.Check(out gamepadOutputError);
+            var report = new
+            {
+                platform = PlatformBackend.PlatformName,
+                osArchitecture = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture.ToString(),
+                processArchitecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString(),
+                sourceVersion = System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+                    .Cast<System.Reflection.AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion,
+                gamepadAvailable, gamepadError, pointerAvailable = displays.Count > 0, displays, pointerOutput, pointerError,
+                gamepadOutput, gamepadOutputError,
+                physicalControllerAcceptance = "pending"
+            };
+            File.WriteAllText(args[diagnosticIndex + 1], System.Text.Json.JsonSerializer.Serialize(report, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+            return;
+        }
+
         if (args.Any(arg => string.Equals(arg, "--headless", StringComparison.OrdinalIgnoreCase)))
         {
             await HeadlessServer.RunAsync(args);
@@ -25,6 +69,9 @@ internal static class Program
             return;
         }
 
+        var ownsDesktop = true;
+        using var desktopMutex = OperatingSystem.IsWindows() ? new Mutex(true, "Local\\OpenWiimote.Desktop", out ownsDesktop) : null;
+        if (!ownsDesktop) return;
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

@@ -32,7 +32,7 @@ internal sealed class FakeWiimoteDevice : HidDevice
     private volatile bool _detached;
 
     public FakeWiimoteDevice(
-        string devicePath = "fake://020000000001",
+        string devicePath = "fake://0211AB33CD55",
         int vendorId = WiimoteProtocol.NintendoVendorId,
         int productId = WiimoteProtocol.WiimoteProductId)
     {

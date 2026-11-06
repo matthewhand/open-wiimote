@@ -354,7 +354,7 @@
       <section class="card">
         <div class="section">AUTO-CONNECT</div>
         <label class="check"><input type="checkbox" id="autoConnect"> Connect when a Wiimote appears</label>
-        <p class="note">The watcher polls USB and Bluetooth HID devices and reconnects after the Wiimote sleeps or moves out of range.</p>
+        <p class="note" id="autoConnectNote">Reconnect paired remotes automatically. Pair a new remote once in Bluetooth settings.</p>
         <label class="check"><input type="checkbox" id="autoEnableEmulation"> Start controller emulation on connect</label>
 
         <details class="extras" style="margin-top:12px;">
@@ -467,6 +467,20 @@
             <option value="screwdriver">Screwdriver (third-party)</option>
           </select>
         </label>
+        <details class="extras" id="poseCalibration">
+          <summary>Set up avatar tilt</summary>
+          <p class="muted small" id="poseRemote">Select a remote to begin.</p>
+          <p class="note">Five still holds set the avatar’s pitch and roll together. Yaw (turning around vertical) cannot be measured with gravity. Do not twist an upright remote. This changes the browser avatar only; live readings and game controls stay unchanged.</p>
+          <div class="section" id="poseStepLabel">1 / 5</div>
+          <p id="posePrompt">Level, buttons facing up</p>
+          <p class="muted small" id="poseHint">Point the tip forward and hold still.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="btn primary" id="poseCapture" disabled>Capture hold</button>
+            <button type="button" class="btn ghost" id="poseRestart" disabled>Start again</button>
+            <button type="button" class="btn ghost" id="poseClear" disabled>Clear setup</button>
+          </div>
+          <p class="note" id="poseStatus" role="status" aria-live="polite"></p>
+        </details>
         <details class="extras" id="viewOptions">
           <summary>View options</summary>
           <label class="check"><input type="checkbox" id="avatarRain"> Matrix rain behind the avatar</label>
@@ -477,11 +491,11 @@
           <label class="check"><input type="checkbox" id="showExtensions" checked> Show extension models</label>
           <label class="check"><input type="checkbox" id="irEnabled"> Switch on the IR camera (pointing)</label>
           <label class="check"><input type="checkbox" id="tiltCalibration"> Level the avatar only</label>
-          <p class="muted small" id="tiltCalibrationNote" style="margin-top:4px" hidden>Avatar level captured. This changes the browser view only; virtual-controller output is unchanged.</p>
+          <p class="muted small" id="tiltCalibrationNote" style="margin-top:4px" hidden>Avatar level captured for this remote. This changes the browser view only; virtual-controller output is unchanged.</p>
         </details>
         <details class="extras" id="tiltOverrides">
           <summary>Avatar tilt mapping (advanced)</summary>
-          <p class="muted small" style="margin:6px 0 10px;">These browser preferences change avatars only and apply to every remote shown here. They do not calibrate the physical sensor or centre the virtual controller.</p>
+          <p class="muted small" style="margin:6px 0 10px;">Axis choices below apply to avatars without a guided setup. Guided setup and level references are saved per remote in this browser. They do not calibrate the physical sensor or centre the virtual controller.</p>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
             <label class="field"><span>Map X</span><select id="devMapX"></select></label>
             <label class="field"><span>Map Y</span><select id="devMapY"></select></label>
@@ -642,6 +656,9 @@
   </section>
 </div>
 
+<script src="tilt-calibration.js"></script>
+<script src="avatar-calibration.js"></script>
+<script src="pose-view.js"></script>
 <script>
 "use strict";
 
@@ -804,14 +821,21 @@ deviceSearchInput.addEventListener("input", renderDeviceList);
 // The avatar turns the measured gravity vector into a rotation, so the axes have to line
 // up with the model: X to the right, Y up the screen, Z out of the face. When the remote
 // is mounted differently, or an axis points the other way, these selectors remap it
-// without a rebuild. The rest offsets remove the constant gravity bias of a remote that
-// does not sit perfectly level, and the limit keeps the model from flipping over.
+// without a rebuild. A level reference rotates gravity rather than subtracting it.
+// Guided setup and level references belong to individual remotes.
 const OVERRIDES_KEY = "openwiimote.tiltOverrides";
 const AXIS_CHOICES = [
   ["x", "accel X"], ["y", "accel Y"], ["z", "accel Z"],
   ["-x", "-accel X"], ["-y", "-accel Y"], ["-z", "-accel Z"]
 ];
 const DEFAULT_OVERRIDES = { mapX: "x", mapY: "y", mapZ: "z", maxTilt: 180, rest: null };
+const avatarSession = new AvatarCalibration.Session();
+const avatarStore = new AvatarCalibration.Store({
+  getItem: key => localStorage.getItem(key),
+  setItem: (key, value) => localStorage.setItem(key, value)
+});
+let avatarEntry = { basis: null, level: null };
+let legacySharedLevel = false;
 let tiltOverrides = { ...DEFAULT_OVERRIDES };
 let tiltSeen = null;
 
@@ -827,7 +851,18 @@ for (const id of ["devMapX", "devMapY", "devMapZ"]) {
 const loadTiltOverrides = () => {
   try {
     const stored = JSON.parse(localStorage.getItem(OVERRIDES_KEY) || "null");
-    if (stored) tiltOverrides = { ...DEFAULT_OVERRIDES, ...stored };
+    if (stored) {
+      legacySharedLevel = !!stored.rest;
+      const choices = new Set(AXIS_CHOICES.map(([value]) => value));
+      const maxTilt = Number(stored.maxTilt);
+      tiltOverrides = {
+        ...DEFAULT_OVERRIDES,
+        ...Object.fromEntries(['mapX', 'mapY', 'mapZ'].map(key =>
+          [key, choices.has(stored[key]) ? stored[key] : DEFAULT_OVERRIDES[key]])),
+        maxTilt: Number.isFinite(maxTilt) ? Math.min(180, Math.max(5, maxTilt)) : 180,
+        rest: null
+      };
+    }
   } catch (error) {
     tiltOverrides = { ...DEFAULT_OVERRIDES };
   }
@@ -844,32 +879,37 @@ const applyTiltOverridesToInputs = () => {
   $("devMapZ").value = tiltOverrides.mapZ;
   $("devMaxTilt").value = String(tiltOverrides.maxTilt);
   $("devMaxTiltText").textContent = tiltOverrides.maxTilt + "°";
-  const calibrated = !!tiltOverrides.rest;
+  const calibrated = !!avatarEntry.level;
   $("tiltCalibration").checked = calibrated;
   $("tiltCalibrationNote").hidden = !calibrated;
+  if (legacySharedLevel && !calibrated) {
+    $("tiltCalibrationNote").hidden = false;
+    $("tiltCalibrationNote").textContent = "Your earlier shared level reference is not assigned to a remote. Level this avatar again to save a per-remote reference.";
+  } else {
+    $("tiltCalibrationNote").textContent = "Avatar level captured for this remote. This changes the browser view only; virtual-controller output is unchanged.";
+  }
 };
 
-/**
- * The rest offset is the one calibration the page has: the accelerometer reading of a
- * remote that is held level. The simple "Tilt calibration" switch and the advanced
- * "Calibrate level" button both drive it, so the two can never disagree.
- */
+/** The one-hold shortcut and guided setup both stay local to this remote. */
 function setRestOffset(rest) {
-  tiltOverrides.rest = rest;
+  syncAvatarContext();
+  const device = selectedDevice();
+  if (!device || !avatarStore.put(device, { level: rest })) {
+    applyTiltOverridesToInputs();
+    showAlert("Cannot save avatar setup in this browser. Check site storage and try again.");
+    return false;
+  }
+  avatarEntry = avatarStore.get(device);
+  legacySharedLevel = false;
   tiltSeen = null;
-  saveTiltOverrides();
-  $("tiltCalibration").checked = !!rest;
-  $("tiltCalibrationNote").hidden = !rest;
+  applyTiltOverridesToInputs();
+  return true;
 }
 
 function currentRestOffset() {
-  const device = selectedDevice();
-  if (!device || !device.state) return null;
-  return {
-    x: num(device.state.accelX),
-    y: num(device.state.accelY),
-    z: num(device.state.accelZ, 1)
-  };
+  syncAvatarContext();
+  const sample = selectedDevice() && avatarSession.still(Date.now());
+  return sample ? sample.accel : null;
 }
 
 /** Shows a message on a button for a moment, then puts its own label back. */
@@ -889,16 +929,13 @@ const axisValue = (vector, spec) => {
 
 /** The gravity vector in the model frame, after the dev overrides. */
 const overrideVector = (state) => {
-  const rest = tiltOverrides.rest || { x: 0, y: 0, z: 0 };
-  const raw = {
-    x: num(state.accelX) - num(rest.x),
-    y: num(state.accelY) - num(rest.y),
-    z: num(state.accelZ, 1) - num(rest.z)
-  };
+  const raw = AvatarCalibration.raw(state);
+  const vector = AvatarCalibration.project(raw, avatarEntry) || { x: 0, y: 0, z: 1 };
+  if (avatarEntry.basis) return vector;
   return {
-    x: axisValue(raw, tiltOverrides.mapX),
-    y: axisValue(raw, tiltOverrides.mapY),
-    z: axisValue(raw, tiltOverrides.mapZ)
+    x: axisValue(vector, tiltOverrides.mapX),
+    y: axisValue(vector, tiltOverrides.mapY),
+    z: axisValue(vector, tiltOverrides.mapZ)
   };
 };
 
@@ -906,12 +943,8 @@ const degreesOf = (value, other) => Math.atan2(value, other) * (180 / Math.PI);
 
 const overrideAngles = (state) => {
   const vector = overrideVector(state);
-  return {
-    vector,
-    tiltX: degreesOf(vector.x, vector.z),
-    tiltY: degreesOf(vector.y, vector.z),
-    tilt: Math.atan2(Math.hypot(vector.x, vector.y), vector.z) * (180 / Math.PI)
-  };
+  const angles = TiltCalibration.tiltAngles(vector) || { roll: 0, pitch: 0, total: 0 };
+  return { vector, tiltX: angles.roll, tiltY: angles.pitch, tilt: angles.total };
 };
 
 const noteTiltRange = (state) => {
@@ -961,11 +994,10 @@ $("devMaxTilt").addEventListener("input", () => {
 $("devCaptureRest").addEventListener("click", () => {
   const rest = currentRestOffset();
   if (!rest) {
-    showAlert("Connect a Wiimote before calibrating the tilt.");
+    showAlert("Select a connected remote and hold still for a second before levelling the avatar.");
     return;
   }
-  setRestOffset(rest);
-  flashButton($("devCaptureRest"), "Level captured");
+  if (setRestOffset(rest)) flashButton($("devCaptureRest"), "Level captured");
 });
 
 $("tiltCalibration").addEventListener("change", (event) => {
@@ -977,21 +1009,113 @@ $("tiltCalibration").addEventListener("change", (event) => {
   const rest = currentRestOffset();
   if (!rest) {
     // Nothing to measure yet, so the switch snaps back instead of pretending to work.
-    setRestOffset(null);
-    showAlert("Connect a Wiimote before calibrating the tilt.");
+    applyTiltOverridesToInputs();
+    showAlert("Select a connected remote and hold still for a second before levelling the avatar.");
     return;
   }
 
-  setRestOffset(rest);
-  flashButton($("devCaptureRest"), "Level captured");
+  if (setRestOffset(rest)) flashButton($("devCaptureRest"), "Level captured");
 });
 $("devResetOverrides").addEventListener("click", () => {
   tiltOverrides = { ...DEFAULT_OVERRIDES };
   tiltSeen = null;
+  if (selectedDevice()) setRestOffset(null);
   saveTiltOverrides();
   applyTiltOverridesToInputs();
 });
 loadTiltOverrides();
+
+// Guided setup uses the same selected remote as readings and profiles.
+function avatarText(id, value) {
+  const node = $(id);
+  if (node.textContent !== value) node.textContent = value;
+}
+function syncAvatarContext() {
+  const device = selectedDevice();
+  const interrupted = Object.keys(avatarSession.draft).length > 0 || !!avatarSession.pending;
+  if (!avatarSession.select(device)) return;
+  avatarEntry = avatarStore.get(device);
+  if (avatarEntry.basis) avatarSession.finish();
+  tiltSeen = null;
+  applyTiltOverridesToInputs();
+  avatarText('poseStatus', interrupted
+    ? 'Remote changed or disconnected. The unfinished setup was cancelled.' : '');
+}
+function cancelAvatarCapture(message) {
+  avatarSession.reset();
+  if (avatarEntry.basis) avatarSession.finish();
+  avatarText('poseStatus', message);
+  renderAvatarCalibration();
+}
+function renderAvatarCalibration() {
+  const device = selectedDevice();
+  const saved = !!avatarEntry.basis && !avatarSession.active;
+  const pending = !!avatarSession.pending;
+  const step = AvatarCalibration.STEPS[Math.min(avatarSession.step, 4)];
+  avatarText('poseRemote', device
+    ? 'Selected: ' + (device.name || 'Wiimote') + ' · saved in this browser'
+    : 'Select a connected remote to begin.');
+  avatarText('poseStepLabel', pending ? 'Ready to save' : saved ? 'Setup saved' : (avatarSession.step + 1) + ' / 5');
+  avatarText('posePrompt', saved ? 'Pitch and roll setup is saved for this remote.' : step.title);
+  avatarText('poseHint', saved
+    ? 'Raise or lower the tip for pitch. Raise a side edge for roll. Clear setup to return to the default view.'
+    : step.hint);
+  avatarText('poseCapture', pending ? 'Retry save' : saved ? 'Set up again' : 'Capture hold');
+  for (const id of ['poseCapture', 'poseRestart', 'poseClear']) $(id).disabled = !device;
+}
+$('poseCapture').addEventListener('click', () => {
+  syncAvatarContext();
+  const result = avatarSession.capture(Date.now());
+  if (result.kind === 'complete') {
+    // Save only a finished basis; partial holds never replace a working setup.
+    const device = selectedDevice();
+    if (!device || result.key !== AvatarCalibration.identity(device) ||
+        !avatarStore.put(device, { basis: result.basis, level: null, source: 'accelerometer-pitch-roll' })) {
+      avatarText('poseStatus', 'Cannot save avatar setup in this browser. Check site storage, then use Retry save.');
+    } else {
+      avatarEntry = avatarStore.get(device);
+      avatarSession.finish();
+      tiltSeen = null;
+      applyTiltOverridesToInputs();
+      avatarText('poseStatus', 'Pitch and roll setup saved for this remote. Game controls are unchanged.');
+    }
+  } else {
+    avatarText('poseStatus', result.kind === 'error' ? result.message
+      : result.kind === 'started' ? 'Start from level. Hold still for a second before each capture.'
+      : 'Captured. Move to the next hold, then keep still for a second.');
+  }
+  renderAvatarCalibration();
+});
+$('poseRestart').addEventListener('click', () => {
+  syncAvatarContext();
+  avatarSession.reset();
+  avatarText('poseStatus', 'Start again from level. Your saved setup is kept until a new one is complete.');
+  renderAvatarCalibration();
+});
+$('poseClear').addEventListener('click', () => {
+  syncAvatarContext();
+  const device = selectedDevice();
+  if (!device || !avatarStore.clear(device)) {
+    avatarText('poseStatus', 'Cannot clear avatar setup in this browser. Check site storage and try again.');
+    return;
+  }
+  avatarEntry = { basis: null, level: null };
+  avatarSession.reset();
+  tiltSeen = null;
+  applyTiltOverridesToInputs();
+  avatarText('poseStatus', 'Setup cleared for this remote. Other remotes are unchanged.');
+  renderAvatarCalibration();
+});
+window.addEventListener('storage', event => {
+  if (event.key !== AvatarCalibration.KEY && event.key !== null) return;
+  const updated = avatarStore.get(selectedDevice());
+  if (JSON.stringify(updated) === JSON.stringify(avatarEntry)) return;
+  avatarEntry = updated;
+  cancelAvatarCapture('Saved avatar setup changed in another tab. Any unfinished holds were cancelled.');
+  applyTiltOverridesToInputs();
+});
+renderAvatarCalibration();
+
 
 
 async function api(path, body, busyLabel) {
@@ -1074,12 +1198,14 @@ async function post(path, body, lockId) {
 
 /* ---------- rendering ---------- */
 
-function applySnapshot(snapshot) {
+function applySnapshot(snapshot, observedAt = null) {
   if (!snapshot || !Array.isArray(snapshot.devices)) return;
   ui.snapshot = snapshot;
   if (!snapshot.devices.some((device) => device.key === ui.selectedKey)) {
     ui.selectedKey = snapshot.devices.length ? snapshot.devices[0].key : null;
   }
+  syncAvatarContext();
+  if (observedAt !== null) avatarSession.observe(selectedDevice(), observedAt);
   // A device tab whose remote vanished falls back to the overview.
   if (isDeviceTab(ui.activeTab) &&
       (snapshot.devices.length < 2 ||
@@ -1090,6 +1216,7 @@ function applySnapshot(snapshot) {
   renderActiveTab();
   renderHeader();
   renderSetup(snapshot);
+  if (window.PointerSetup) window.PointerSetup.update(snapshot);
   renderDeviceList();
   renderSelected();
   updatePanelGating();
@@ -1107,7 +1234,12 @@ function renderSetup(snapshot) {
   const attached = devices.filter(device => device.virtualControllerAttached).length;
   $("setupRemote").textContent = devices.length
     ? devices.length + " remote(s) connected. Press buttons or tilt to check the live readings."
-    : "Pair your remote in Bluetooth settings, then press a button and choose Scan. For a first connection, use the Bluetooth panel.";
+    : snapshot.platform === "Linux" && snapshot.settings && snapshot.settings.autoConnect
+      ? "Already paired? Press 1 + 2 together and allow up to 15 seconds to join. For a new remote, pair and trust it in Bluetooth settings first."
+      : "Pair your remote in Bluetooth settings, then wake it. Enable Auto-connect to open it automatically, or choose Scan.";
+  $("autoConnectNote").textContent = snapshot.platform === "Linux"
+    ? "Reconnects paired, trusted Wii Remotes. Press 1 + 2 to join; each remote remembers its player light."
+    : "Opens Wii Remotes connected by your operating system. Pair a new remote in Bluetooth settings first.";
   $("setupProfile").textContent = snapshot.activeProfile
     ? "Active profile: " + snapshot.activeProfile + ". A profile pinned to a remote takes priority."
     : "Choose a profile in Profiles before playing.";
@@ -1170,7 +1302,7 @@ function renderDeviceList() {
     const state = device.state || {};
     return device.key + "|" + device.name + "|" + device.bluetoothAddress + "|" +
       num(state.extensionType, 0) + "|" + (state.extensionConnected ? 1 : 0) + "|" +
-      (state.batteryPercent ?? "") + "|" + num(device.ledMask, 0);
+      (state.batteryPercent ?? "") + "|" + num(device.ledMask, 0) + "|" + num(device.playerNumber, 0);
   }).join("~");
 
   const group = $("modelGroup");
@@ -1239,7 +1371,8 @@ function deviceButton(device) {
 
   const battery = element("span", "battery-value", batteryText(state.batteryPercent));
   battery.style.color = batteryColor(state.batteryPercent);
-  const player = playerFromMask(device.ledMask);
+  const player = Object.prototype.hasOwnProperty.call(device, "playerNumber")
+    ? num(device.playerNumber, 0) : playerFromMask(device.ledMask);
   const side = element("span", "device-side");
   side.append(battery, element("span", "muted small", player ? "Player " + player : "Connected"));
 
@@ -1371,6 +1504,8 @@ function deviceProfilePayload() {
 }
 
 function renderSelected() {
+  syncAvatarContext();
+  renderAvatarCalibration();
   const device = selectedDevice();
   if (ui.snapshot && ui.snapshot.devices) updateStrip();
   $("emptyDetails").hidden = device !== null;
@@ -2252,6 +2387,7 @@ function enterApp() {
 
 /** Shows the token overlay and keeps the workspace out of reach until a token works. */
 function showLogin(message) {
+  cancelAvatarCapture("Sign in again before capturing a hold.");
   ui.polling = false;
   $("login").hidden = false;
   $("app").hidden = true;
@@ -2306,8 +2442,9 @@ async function poll() {
   try {
     const snapshot = await api("/api/state");
     if (!snapshot || !Array.isArray(snapshot.devices)) throw new Error("Invalid service state.");
-    applySnapshot(snapshot);
+    applySnapshot(snapshot, Date.now());
   } catch (error) {
+    cancelAvatarCapture("Service connection lost. Start again when the remote is available.");
     if (error.unauthorized) {
       ui.token = "";
       localStorage.removeItem(TOKEN_KEY);
@@ -2507,6 +2644,11 @@ function aim(state) {
   // face left or right. The dev overrides remap the accelerometer axes onto those three.
   const vector = overrideVector(state);
   const raw = [vector.x, vector.y, vector.z];
+  if (avatarEntry.basis) {
+    const identityBasis = { x: { x: 1, y: 0, z: 0 }, y: { x: 0, y: 1, z: 0 }, z: { x: 0, y: 0, z: 1 } };
+    const posed = PoseView.orientation(raw, identityBasis, ui.theme);
+    if (posed) { target = posed; return; }
+  }
   const length = Math.hypot(raw[0], raw[1], raw[2]);
   if (length < 0.15) return;
   const up = raw.map((value) => value / length);
@@ -2566,10 +2708,15 @@ function frame() {
   ctx.fillStyle = "rgba(3,7,15,0.31)";
   ctx.fill();
 
-  const modelScale = Math.min(w / 12.2, h / 6.8);
+  const guided = !!avatarEntry.basis;
+  const spin = fromAxis([0, 1, 0], guided ? manualYaw : manualYaw - 0.36);
+  const yaw = guided ? PoseView.mul(fromAxis([1, 0, 0], 0.55), spin) : spin;
+  const extent = guided ? PoseView.extent(PoseView.mul(yaw, current)) : null;
+  const modelScale = guided
+    ? Math.min(w / (2 * extent[0] + 1.6), h / (2 * extent[1] + 1.6))
+    : Math.min(w / 12.2, h / 6.8);
   const focal = modelScale * CAMERA;
   const cx = w * 0.5, cy = h * 0.52;
-  const yaw = fromAxis([0, 1, 0], manualYaw - 0.36);
   const camera = makeCamera(current, yaw, focal, cx, cy);
   const pressed = new Set(deviceState ? buttonNames(num(deviceState.buttons)) : []);
   drawFaces(ctx, camera, faces, pressed, -0.16);
@@ -3338,5 +3485,6 @@ async function boot() {
 
 void boot();
 </script>
+<script src="pointer-setup.js"></script>
 </body>
 </html>

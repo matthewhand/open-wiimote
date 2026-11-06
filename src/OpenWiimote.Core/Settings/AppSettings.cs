@@ -23,6 +23,8 @@ public sealed class AppSettings
         }
     }
 
+    public OpenWiimote.Core.Pointer.PointerPreferences Pointer { get; set; } = new();
+
     public bool AutoConnect { get; set; } = true;
     public int PollIntervalMs { get; set; } = 1000;
     public int ReconnectDelayMs { get; set; } = 3000;
@@ -33,6 +35,8 @@ public sealed class AppSettings
     public string PreferredProfile { get; set; } = "Default";
     /// <summary>Profile to use for a specific device, keyed by the device key or Bluetooth address.</summary>
     public Dictionary<string, string> DeviceProfiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>Remembered player lights, keyed by stable device identity; at most four slots.</summary>
+    public Dictionary<string, int> PlayerSlots { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public string AvatarTheme { get; set; } = "wiimote";
 
     /// <summary>Matrix style digital rain behind the dashboard avatar.</summary>

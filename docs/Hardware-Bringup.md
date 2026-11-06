@@ -131,5 +131,5 @@ extension payloads, so the handshake can be checked offline. These lines are wha
   ViGEm and uinput backends do not publish the level to the operating system yet.
 - MotionPlus gyro support is an unavailable experimental stub (ROADMAP item 10). The
   current connection does not read the unverified gyro register block or produce gyro
-  samples. The research remains in draft PR #17; physical activation, freshness and
+  samples. MotionPlus remains future work; physical activation, freshness and
   calibration validation are future work.

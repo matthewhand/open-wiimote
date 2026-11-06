@@ -13,12 +13,14 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="190" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Margin="0,0,0,18">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
@@ -29,7 +31,10 @@
                            Margin="0,2,0,0" />
             </StackPanel>
 
-            <Border Grid.Column="1"
+            <Button Grid.Column="1" Content="Sensor bar pointer setup" Click="PointerSetup_Click"
+                    Classes="primary" VerticalAlignment="Center" Margin="12,0,14,0" />
+            <ToggleButton x:Name="MouseModeToggle" Grid.Column="2" Content="Mouse mode: Off" IsChecked="False" Click="MouseMode_Click" VerticalAlignment="Center" Margin="0,0,14,0" ToolTip.Tip="Sensor-bar mouse: A clicks, B right-clicks, Home stops. Calibrate using Sensor bar pointer setup first." />
+            <Border Grid.Column="3"
                     Background="{DynamicResource PanelBrush}"
                     BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1"
@@ -45,19 +50,20 @@
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="330" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="380" />
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="0.85*" MinWidth="290" />
+                <ColumnDefinition Width="1.15*" MinWidth="390" />
             </Grid.ColumnDefinitions>
 
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,14,0">
-                <StackPanel>
-                    <Border Classes="card">
+            <TabControl x:Name="ConnectionTabs" Grid.Column="0" Margin="0,0,14,0">
+                <TabItem Header="Connect"><ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"><StackPanel>
+<Border Classes="card">
                         <StackPanel>
+                            <Button x:Name="WindowsPairButton" Content="Pair a Wiimote in Windows" Click="PairWindows_Click" Margin="0,0,0,12" />
                             <TextBlock Classes="section" Text="AUTO-CONNECT" />
 
                             <CheckBox x:Name="AutoConnectCheckBox"
-                                      Content="Connect when a Wiimote appears"
+                                      Content="Auto-connect Wiimotes"
                                       Click="AutoConnectCheckBox_Changed" />
 
                             <TextBlock Classes="muted"
@@ -65,24 +71,33 @@
                                        Text="The watcher polls USB and Bluetooth HID devices and reconnects after the Wiimote sleeps or moves out of range." />
 
                             <CheckBox x:Name="AutoEnableEmulationCheckBox"
-                                      Content="Start controller emulation on connect"
+                                      Content="Enable gamepad on connect"
                                       Click="AutoEnableEmulationCheckBox_Changed" />
 
-                            <CheckBox x:Name="IrEnabledCheckBox"
-                                      Content="Switch on the IR camera (pointing)"
-                                      Click="IrEnabledCheckBox_Changed"
-                                      Margin="0,10,0,0" />
-
-                            <TextBlock Classes="muted"
-                                       Margin="0,6,0,0"
-                                       FontSize="11"
-                                       Text="The IR camera needs a sensor bar or another infrared source, and it drains the battery faster." />
-
-                            <Border Height="1"
-                                    Background="{DynamicResource BorderBrush}"
-                                    Margin="0,16,0,14" />
-
-                            <TextBlock Classes="section" Text="TUNING" />
+                        </StackPanel>
+                    </Border>
+<Border Classes="card" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="QUICK ACTIONS" />
+                            <Button Content="Scan for Wiimotes"
+                                    Click="ScanNowButton_Click"
+                                    Margin="0,0,0,8" />
+                            <Button Classes="danger"
+                                    Content="Disconnect all"
+                                    Click="DisconnectAllButton_Click"
+                                    Margin="0,0,0,8" />
+                            <Button Classes="ghost"
+                                    Content="Open profiles folder"
+                                    Click="OpenProfilesFolderButton_Click"
+                                    HorizontalAlignment="Left" />
+                            <TextBlock x:Name="ProfileFolderText"
+                                       Classes="muted"
+                                       Margin="0,8,0,0" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel></ScrollViewer></TabItem>
+                <TabItem Header="Settings"><ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"><StackPanel>
+<Border Classes="card"><StackPanel>                            <TextBlock Classes="section" Text="TUNING" />
 
                             <Grid Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
@@ -123,42 +138,9 @@
                             <Button Classes="primary"
                                     Content="Save settings"
                                     Click="SaveSettingsButton_Click" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Classes="card" Margin="0,14,0,0">
-                        <StackPanel>
-                            <TextBlock Classes="section" Text="QUICK ACTIONS" />
-                            <Button Content="Scan for Wiimotes"
-                                    Click="ScanNowButton_Click"
-                                    Margin="0,0,0,8" />
-                            <Button Classes="danger"
-                                    Content="Disconnect all"
-                                    Click="DisconnectAllButton_Click"
-                                    Margin="0,0,0,8" />
-                            <Button Classes="ghost"
-                                    Content="Open profiles folder"
-                                    Click="OpenProfilesFolderButton_Click"
-                                    HorizontalAlignment="Left" />
-                            <TextBlock x:Name="ProfileFolderText"
-                                       Classes="muted"
-                                       Margin="0,8,0,0" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Classes="card" Margin="0,14,0,0">
-                        <StackPanel>
-                            <TextBlock Classes="section" Text="PLATFORM &amp; PAIRING" />
-                            <TextBlock x:Name="PlatformText" Classes="value" Margin="0,0,0,8" />
-                            <TextBlock Classes="muted" Text="BLUETOOTH" Margin="0,0,0,4" />
-                            <TextBlock x:Name="BluetoothHintText" Classes="muted" Margin="0,0,0,12" />
-                            <TextBlock Classes="muted" Text="CONTROLLER BACKEND" Margin="0,0,0,4" />
-                            <TextBlock x:Name="GamepadBackendText" Classes="muted" />
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </ScrollViewer>
-
+</StackPanel></Border>
+                </StackPanel></ScrollViewer></TabItem>
+            </TabControl>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -356,7 +338,7 @@
                                         <TextBlock Text="{Binding IrText}" Classes="value" />
                                     </StackPanel>
 
-                                    <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
+                                    <StackPanel Grid.Row="2" Margin="0,0,12,14">
                                         <TextBlock Classes="section" Text="CONNECTION" Margin="0,0,0,3" />
                                         <TextBlock Text="{Binding ConnectionState}" Classes="value" />
                                     </StackPanel>
@@ -367,12 +349,24 @@
                 </Border>
             </Grid>
 
-            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" Margin="14,0,0,0">
-                <StackPanel>
-                    <Border Classes="card">
+            <GridSplitter Grid.Column="1" Width="8" HorizontalAlignment="Right" VerticalAlignment="Stretch" ResizeDirection="Columns" ResizeBehavior="CurrentAndNext" Background="{DynamicResource BorderBrush}" />
+            <TabControl x:Name="ControllerTabs" Grid.Column="2" Margin="14,0,0,0">
+                <TabItem Header="Sensors"><ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"><StackPanel>
+<Border Classes="card"><StackPanel><TextBlock Classes="section" Text="LIVE IR SENSOR" /><TextBlock x:Name="MouseModeHint" Classes="muted" Text="Mouse mode is off. Use Sensor bar pointer setup to calibrate." />                            <CheckBox x:Name="IrEnabledCheckBox"
+                                      Content="Switch on the IR camera (pointing)"
+                                      Click="IrEnabledCheckBox_Changed"
+                                      Margin="0,10,0,0" />
+
+                            <TextBlock Classes="muted"
+                                       Margin="0,6,0,0"
+                                       FontSize="11"
+                                       Text="The IR camera needs a sensor bar or another infrared source, and it drains the battery faster." />
+
+<controls:IrSensorView x:Name="IrSensor" Height="150" Margin="0,8,0,0" /><TextBlock Classes="muted" FontSize="11" Text="Raw camera dots for the selected remote. Two dots are needed for pointer calibration; this is not a video camera." /></StackPanel></Border>
+<Border Classes="card">
                         <StackPanel>
                             <TextBlock Classes="section" Text="WIIMOTE AVATAR" />
-                            <controls:WiimoteAvatar x:Name="Avatar" Height="245" />
+                            <controls:WiimoteAvatar x:Name="Avatar" Height="150" />
                             <Grid Margin="0,10,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -394,25 +388,14 @@
                                        Text="Tilt follows the accelerometer; yaw needs MotionPlus. Drag the model to inspect every side." />
                         </StackPanel>
                     </Border>
-
-                    <Border Classes="card" Margin="0,14,0,0">
+                </StackPanel></ScrollViewer></TabItem>
+                <TabItem Header="Mapping"><ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"><StackPanel>
+<Border Classes="card" Margin="0,14,0,0">
                         <StackPanel>
-                            <TextBlock Classes="section" Text="EXTENSION CONTROLLER" />
-                            <controls:ExtensionAvatar x:Name="ExtensionAvatarControl" Height="170" />
-                            <TextBlock Text="{Binding SelectedDevice.ExtensionText}"
-                                       Classes="muted"
-                                       FontSize="11"
-                                       Margin="0,6,0,0"
-                                       HorizontalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
-
-                    <Border Classes="card" Margin="0,14,0,0">
-                        <StackPanel>
-                            <TextBlock Classes="section" Text="VIRTUAL CONTROLLER" />
+                            <TextBlock Classes="section" Text="VIRTUAL XBOX GAMEPAD" />
 
                             <CheckBox x:Name="EmulationToggle"
-                                      Content="Enable virtual controller"
+                                      Content="Enable Xbox gamepad output"
                                       Click="EmulationToggle_Changed" />
 
                             <TextBlock x:Name="EmulationStatusText"
@@ -592,8 +575,9 @@
                             </Grid>
                         </StackPanel>
                     </Border>
-
-                    <Border Classes="card" Margin="0,14,0,0">
+                </StackPanel></ScrollViewer></TabItem>
+                <TabItem Header="Tilt"><ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"><StackPanel>
+<Border Classes="card" Margin="0,14,0,0">
                         <StackPanel>
                             <TextBlock Classes="section" Text="TILT STEERING" />
 
@@ -698,8 +682,20 @@
                                     Click="SaveTiltSettingsButton_Click" />
                         </StackPanel>
                     </Border>
-
-                    <Border Classes="card" Margin="0,14,0,0">
+                </StackPanel></ScrollViewer></TabItem>
+                <TabItem Header="Remote"><ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled"><StackPanel>
+<Border Classes="card" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="EXTENSION CONTROLLER" />
+                            <controls:ExtensionAvatar x:Name="ExtensionAvatarControl" Height="170" />
+                            <TextBlock Text="{Binding SelectedDevice.ExtensionText}"
+                                       Classes="muted"
+                                       FontSize="11"
+                                       Margin="0,6,0,0"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+<Border Classes="card" Margin="0,14,0,0">
                         <StackPanel>
                             <TextBlock Classes="section" Text="WIIMOTE CONTROLS" />
 
@@ -753,12 +749,25 @@
                                        Text="LED and rumble changes apply to every connected Wiimote." />
                         </StackPanel>
                     </Border>
-                </StackPanel>
-            </ScrollViewer>
+                </StackPanel></ScrollViewer></TabItem>
+            </TabControl>
+
         </Grid>
 
-        <Border Grid.Row="2" Classes="card" Margin="0,14,0,0" Padding="14">
-            <Grid>
+        <Expander x:Name="TroubleshootingExpander" Grid.Row="2" Header="Troubleshooting" IsExpanded="False" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="0,12,0,0">
+<Grid ColumnDefinitions="330,*" MaxHeight="230"><ScrollViewer VerticalScrollBarVisibility="Visible">
+<Border Classes="card" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Classes="section" Text="PLATFORM &amp; PAIRING" />
+                            <TextBlock x:Name="PlatformText" Classes="value" Margin="0,0,0,8" />
+                            <TextBlock Classes="muted" Text="BLUETOOTH" Margin="0,0,0,4" />
+                            <TextBlock x:Name="BluetoothHintText" Classes="muted" Margin="0,0,0,12" />
+                            <TextBlock Classes="muted" Text="CONTROLLER BACKEND" Margin="0,0,0,4" />
+                            <TextBlock x:Name="GamepadBackendText" Classes="muted" />
+                        </StackPanel>
+                    </Border>
+                </ScrollViewer><Grid Grid.Column="1">        <Border Classes="card" Margin="0,14,0,0" Padding="14">
+            <Grid Height="160">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -800,5 +809,7 @@
                 </ListBox>
             </Grid>
         </Border>
+</Grid></Grid>
+        </Expander>
     </Grid>
 </Window>

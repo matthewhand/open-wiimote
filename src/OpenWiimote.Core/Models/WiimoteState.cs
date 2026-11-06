@@ -47,6 +47,9 @@ public sealed record WiimoteState
     public NunchukState? Nunchuk { get; init; }
     public ClassicControllerState? ClassicController { get; init; }
     public IrPoint[] IrPoints { get; init; } = Array.Empty<IrPoint>();
+    /// <summary>Only an actual IR-bearing report advances these freshness markers.</summary>
+    public DateTimeOffset? LastIrReport { get; init; }
+    public long IrFrameNumber { get; init; }
     public DateTimeOffset LastReport { get; init; } = DateTimeOffset.UtcNow;
 
     /// <summary>The roll of the remote in degrees, positive when it is rolled to the right.</summary>

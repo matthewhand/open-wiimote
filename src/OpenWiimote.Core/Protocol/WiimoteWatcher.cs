@@ -1,4 +1,5 @@
 using HidSharp;
+using OpenWiimote.Core.Bluetooth;
 
 namespace OpenWiimote.Core.Protocol;
 
@@ -12,12 +13,15 @@ public sealed class WiimoteWatcher : IAsyncDisposable
     private readonly Dictionary<string, RetryState> _retries = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, DateTimeOffset> _lastFailureLog = new(StringComparer.OrdinalIgnoreCase);
     private readonly Func<IEnumerable<HidDevice>> _enumerateDevices;
-    private WiimoteWatcherOptions _options = new();
+    private volatile WiimoteWatcherOptions _options = new();
     private CancellationTokenSource? _cts;
     private Task? _loopTask;
+    private readonly PairedWiimoteReconnect? _bluetoothReconnect;
+    private Task? _bluetoothTask;
 
     public WiimoteWatcher()
-        : this(static () => DeviceList.Local.GetHidDevices())
+        : this(static () => DeviceList.Local.GetHidDevices(),
+            OperatingSystem.IsLinux() ? new PairedWiimoteReconnect() : null)
     {
     }
 
@@ -27,8 +31,14 @@ public sealed class WiimoteWatcher : IAsyncDisposable
     /// test process; the default source is the device list of the operating system.
     /// </summary>
     public WiimoteWatcher(Func<IEnumerable<HidDevice>> enumerateDevices)
+        : this(enumerateDevices, null)
+    {
+    }
+
+    internal WiimoteWatcher(Func<IEnumerable<HidDevice>> enumerateDevices, PairedWiimoteReconnect? bluetoothReconnect)
     {
         _enumerateDevices = enumerateDevices;
+        _bluetoothReconnect = bluetoothReconnect;
     }
 
     public event EventHandler<WiimoteConnection>? DeviceConnected;
@@ -51,6 +61,7 @@ public sealed class WiimoteWatcher : IAsyncDisposable
     public void UpdateOptions(WiimoteWatcherOptions options)
     {
         _options = options.Normalize();
+        _bluetoothReconnect?.SetEnabled(_options.AutoConnect);
     }
 
     public async Task StartAsync(WiimoteWatcherOptions options, CancellationToken cancellationToken = default)
@@ -65,13 +76,15 @@ public sealed class WiimoteWatcher : IAsyncDisposable
                 return;
             }
 
-            _options = options.Normalize();
+            UpdateOptions(options);
             var source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _cts = source;
             try
             {
                 await ScanAsync(force: false, source.Token).ConfigureAwait(false);
                 _loopTask = Task.Run(() => LoopAsync(source.Token));
+                if (_bluetoothReconnect is not null)
+                    _bluetoothTask = Task.Run(() => _bluetoothReconnect.RunAsync(source.Token));
             }
             catch
             {
@@ -409,6 +422,13 @@ public sealed class WiimoteWatcher : IAsyncDisposable
             catch (OperationCanceledException)
             {
             }
+        }
+
+        if (_bluetoothTask is not null)
+        {
+            try { await _bluetoothTask.ConfigureAwait(false); }
+            catch (OperationCanceledException) { }
+            _bluetoothTask = null;
         }
 
         WiimoteConnection[] connections;

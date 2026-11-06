@@ -1,66 +1,20 @@
-# Quality plan for original Wii Remotes
+# Release quality checklist
 
-The target is dependable buttons, tilt, profiles, reconnects and virtual-controller output.
-MotionPlus is outside the supported feature set. A subjective 4.5/5 rating requires a
-successful physical play session as well as automated evidence.
+rc.11 is a prerelease with one confirmed real Windows ARM IR mouse session. The native
+acceptance matrix is in [Platform-Support.md](Platform-Support.md).
 
-## Implemented and covered offline
+- Preserve saved Bluetooth bonds and neutralize active output on loss, shutdown or handover.
+- Never let button/status reports refresh stale IR; require exactly two plausible lights
+  for pointer capture and retain diagnostic visibility of missing/extra dots.
+- Keep mouse output off during calibration and startup. Save calibration per remote/display,
+  reject invalid or unstable targets, and keep previous calibration on cancellation/failure.
+- Verify independent profiles, player assignments and output for two remotes.
+- Run .NET, browser/API, calibration math, report replay and licensing checks locally.
+- Review actual runtime/package hashes and retain all original license and notice texts.
+- Review public source, documentation and package metadata for private settings, identifiers,
+  local paths, credentials and private development ancestry before publishing.
+- Record physical acceptance honestly. Passing simulated tests does not prove Bluetooth,
+  sensor geometry, driver installation or normal gameplay.
+- Keep GitHub Actions off and publish source snapshots with public-only ancestry.
 
-- Dashboard setup guidance distinguishes Bluetooth connection, controller permissions,
-  emulation off, missing output, active output and service loss. It links to the existing
-  controller/profile controls and works on a narrow screen.
-- Action endpoints require POST. Malformed profile creation and unknown numeric button
-  mappings cannot change a saved profile. Profile filename collisions cannot overwrite
-  another profile, and overlapping saves use separate temporary files. Renamed/deleted
-  profiles update remote pins; unknown settings from other builds survive saving.
-- Pinned device profiles survive enabling emulation and selecting an active profile.
-  Replaced connections cannot remove or feed input into a replacement session. Controllers
-  receive neutral output on release. Output failures are visible and can be retried.
-- MotionPlus has an explicit experimental stub that is always unavailable and supplies
-  no samples. The old, unverified gyro-register polling has been removed. Existing profile
-  fields and extension decoding remain for compatibility; the deferred MotionPlus research retains research.
-- Linux has read-only diagnostics and setup/recovery instructions in `Linux-Setup.md`.
-
-## Validation and integration
-
-the earlier candidate validation passed 246 .NET tests and 46 browser tests using isolated synthetic
-devices and profiles. It was merged and installed as a separate release on the Linux test host. The Linux diagnostic also passed on the Linux test host without modifying it.
-The next candidate is prepared with `scripts/package-linux.sh`; see `Linux-Release.md`
-for versioning, package checks, installation and rollback. Hosted CI remains intentionally unused.
-The follow-up fixes passed 258 .NET tests and 51 browser tests offline. They cover watcher
-shutdown races, preserved Bluetooth bonds, desktop output recovery, device-tab refresh,
-focused-editor profile changes and hung/malformed state responses.
-Private candidate preparation does not authorize public publication or a kernel-driver change.
-
-## Remaining physical acceptance
-
-Use the checklist in `Linux-Setup.md` with the updated build, both real remotes, and a game.
-One app-level reconnect restored its profile and output; one stick axis moved and the user
-reported tilt looking good. A full button recording, neutral pose, pitch, physical Bluetooth
-reconnect and two-remotes game session remain unverified. The temporary Hardware Test profile was archived and removed, and the original Default
-profile and device pins were restored. Emulation was enabled during that session; this is historical evidence, not a live-status reading.
-Physical button/tilt feel, Bluetooth range, LEDs, rumble, and game integration cannot be
-established by the synthetic suites. They remain unverified until that session is complete.
-Windows and macOS behavior also require platform-specific acceptance; macOS currently
-has no virtual-controller backend. Do not claim a cross-platform 4.5/5 result from Linux tests.
-
-## License and notice integration
-
-The existing owner-provided ISC license is tracked at the source root and included in
-Linux archives. Full dependency notices and provenance are recorded in
-`THIRD-PARTY-NOTICES.md` and `third_party/manifest.json`. The package step rejects
-unreviewed dependencies, changed notice text and unreviewed SDKs. License integration
-does not complete the remaining physical acceptance or a source-history privacy review.
-
-## Current source / release distinction (6 November 2026)
-
-The public rc.2 Linux prerelease is installed independently of this checkout. Source now includes the merged calibration/pose helper PRs; the wider dashboard/pointer
-work remains in the separate dashboard/pointer work and MotionPlus remains in the deferred MotionPlus research. Neither draft is
-part of the supported release. See `Platform-Support.md` for the Windows/Linux/macOS
-acceptance gates. Hosted CI remains disabled; local verification includes the Node math
-suites as well as .NET, browser, replay and licensing checks.
-
-The 6 November polish candidate passed **258 .NET tests, 36 Node math/pose tests,
-51 browser/API tests and nine licensing regressions** in a network-isolated Linux run,
-including report replay. The PowerShell verification entry point parses on Windows;
-that is not a native Windows build or controller test.
+Future platform and MotionPlus work is tracked in [the roadmap](../ROADMAP.md).

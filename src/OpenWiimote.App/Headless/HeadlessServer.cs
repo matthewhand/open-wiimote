@@ -182,7 +182,7 @@ public static class HeadlessServer
             "/api/disconnect" or "/api/emulation" or "/api/rumble" or "/api/leds" or
             "/api/profile" or "/api/deviceprofile" or "/api/settings" or "/api/tilt" or
             "/api/mapping" or "/api/mapping/extension" or "/api/mapping/stick" or
-            "/api/logs/clear" or "/api/pair" or "/api/bluetooth/pair";
+            "/api/pointer" or "/api/logs/clear" or "/api/pair" or "/api/bluetooth/pair";
         if (action && method != "POST")
         {
             context.Response.AddHeader("Allow", "POST");
@@ -282,6 +282,20 @@ public static class HeadlessServer
 
                 service.SetRumble(rumbleRequest.Enabled);
                 await WriteJsonAsync(context, HttpStatusCode.OK, service.GetSnapshot()).ConfigureAwait(false);
+                return;
+
+            case "/api/pointer":
+                var pointerRequest = await ReadJsonAsync<PointerRequest>(context.Request).ConfigureAwait(false);
+                try
+                {
+                    if (pointerRequest is null) throw new ArgumentException("A pointer action is required.");
+                    service.PointerAction(pointerRequest);
+                    await WriteJsonAsync(context, HttpStatusCode.OK, service.GetSnapshot()).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is ArgumentException or IOException or PlatformNotSupportedException)
+                {
+                    await WriteJsonAsync(context, HttpStatusCode.BadRequest, new { error = ex.Message }).ConfigureAwait(false);
+                }
                 return;
 
             case "/api/leds":

@@ -24,6 +24,3 @@ OpenWiimote/
 # Python notice tooling and tests
 __pycache__/
 *.pyc
-
-# Also ignore a local dependency-cache symlink.
-node_modules
